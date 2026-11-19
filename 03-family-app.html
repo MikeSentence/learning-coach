@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小胖鱼陪练 · 家庭版</title>
+<style>
+  :root{
+    --bg:#FAF8FC;--card:#fff;--line:#EAE4F2;--soft:#F3EFF8;
+    --ink:#292235;--ink2:#635A72;--ink3:#9A90AA;
+    --brand:#6C5FC0;--brand-soft:#EEEDFE;--brand-ink:#3C3489;
+    --pink:#D4537E;--pink-soft:#FBEAF0;
+    --amber:#BA7517;--amber-soft:#FAEEDA;
+    --ok:#0F6E56;--ok-soft:#E1F5EE;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.65 var(--font)}
+  button,input{font-family:inherit;font-size:inherit}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+  header{background:var(--card);border-bottom:1px solid var(--line)}
+  .head{max-width:1160px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+  .mark{width:34px;height:34px;border-radius:11px;background:var(--brand-soft);display:grid;place-items:center}
+  .brand b{font-size:16px;font-weight:600}
+  .brand span{display:block;font-size:12px;color:var(--ink3);margin-top:-2px}
+  .head .right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .tag{font-size:11px;padding:5px 11px;border-radius:20px;background:var(--pink-soft);color:var(--pink)}
+  .tag.gray{background:var(--bg);color:var(--ink3);border:1px solid var(--line)}
+  a.back{font-size:12px;color:var(--brand);text-decoration:none}
+  .btn-parent{border:1px solid var(--line);background:#fff;color:var(--ink2);padding:7px 13px;border-radius:9px;font-size:12px}
+  main{padding:24px 0 44px}
+  .intro{margin:0 0 18px;color:var(--ink2);font-size:13px}
+  .intro b{color:var(--ink)}
+  .grid{display:grid;grid-template-columns:250px 1fr 260px;gap:16px;align-items:start}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .card h2{font-size:14px;font-weight:600;margin:0 0 3px}
+  .card .sub{font-size:12px;color:var(--ink3);margin:0 0 15px}
+  .pet-stage{background:var(--brand-soft);border-radius:12px;padding:8px;position:relative;overflow:hidden}
+  .pet-stage svg{width:100%;height:168px;display:block}
+  .pet-stage.dance svg{animation:dance 1.5s ease-in-out}
+  @keyframes dance{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-11px) rotate(-5deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-11px) rotate(5deg)}}
+  @media(prefers-reduced-motion:reduce){.pet-stage.dance svg{animation:none}}
+  .pet-words{font-size:13px;line-height:1.7;margin-top:12px;min-height:44px}
+  .pet-words b{color:var(--brand-ink)}
+  .streak{display:flex;gap:8px;margin-top:14px;padding-top:13px;border-top:1px solid var(--soft);font-size:12px;color:var(--ink2)}
+  .streak b{color:var(--pink);font-size:16px}
+  .equipped{display:flex;gap:5px;flex-wrap:wrap;margin-top:11px}
+  .equipped span{font-size:10px;padding:3px 8px;border-radius:20px;background:var(--soft);color:var(--ink2)}
+
+  .q-top{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}
+  .chip{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--bg);border:1px solid var(--line);color:var(--ink2)}
+  .chip.b{background:var(--brand-soft);border-color:#D9D5F5;color:var(--brand-ink);font-weight:600}
+  .chip.a{background:var(--amber-soft);border-color:#F0D9AE;color:var(--amber);letter-spacing:1px}
+  .q-text{font-size:16px;font-weight:500;line-height:1.75;margin:0 0 18px}
+  .opts{display:grid;gap:9px}
+  .opt{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  .opt:hover{border-color:var(--brand)}
+  .opt.on{border-color:var(--brand);background:var(--brand-soft)}
+  .opt.right{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.wrong{border-color:var(--pink);background:var(--pink-soft)}
+  .opt .k{width:22px;height:22px;border-radius:7px;background:var(--soft);display:grid;place-items:center;font-size:12px;font-weight:600;flex:none}
+  .actions{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--brand);background:var(--brand);color:#fff;padding:8px 18px;border-radius:9px;font-weight:600;font-size:13px}
+  .btn:hover{background:var(--brand-ink)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.ghost{background:#fff;color:var(--ink2);border-color:var(--line)}
+  .btn.sm{padding:6px 12px;font-size:12px}
+  .act-tip{font-size:11px;color:var(--ink3)}
+  .result{display:none;margin-top:16px;padding:13px 15px;border-radius:10px;font-size:13px;line-height:1.8}
+  .result.on{display:block}
+  .result.ok{background:var(--ok-soft);color:#0A4C3C}
+  .result.no{background:var(--pink-soft);color:#72243E}
+  .result .gain{font-weight:600;color:var(--amber);margin-top:5px}
+  .map-mini{display:flex;gap:5px;margin-top:16px;padding-top:14px;border-top:1px solid var(--soft)}
+  .map-mini div{flex:1;text-align:center;font-size:10px;color:var(--ink3);padding:6px 2px;border-radius:7px;background:var(--bg)}
+  .map-mini div.done{background:var(--ok-soft);color:var(--ok)}
+  .map-mini div.now{background:var(--brand-soft);color:var(--brand-ink);font-weight:600}
+
+  .star-box{display:flex;align-items:baseline;gap:7px;background:var(--amber-soft);border-radius:10px;padding:11px 13px;margin-bottom:14px}
+  .star-box .n{font-size:25px;font-weight:600;color:var(--amber);font-variant-numeric:tabular-nums}
+  .star-box .u{font-size:12px;color:#8A6216}
+  .shop-item{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--soft)}
+  .shop-item:last-child{border-bottom:0}
+  .shop-ico{width:36px;height:36px;border-radius:10px;background:var(--soft);display:grid;place-items:center;flex:none;font-size:17px}
+  .shop-t{font-size:12px;font-weight:600}
+  .shop-d{font-size:10px;color:var(--ink3)}
+  .shop-item button{margin-left:auto;border:1px solid var(--line);background:#fff;color:var(--ink2);padding:5px 9px;border-radius:7px;font-size:11px;white-space:nowrap}
+  .shop-item button.can{border-color:var(--amber);color:var(--amber);background:var(--amber-soft);font-weight:600}
+  .shop-item button.wear{border-color:var(--brand);background:var(--brand);color:#fff;font-weight:600}
+  .shop-note{font-size:11px;color:var(--ink3);line-height:1.7;margin-top:13px;padding-top:12px;border-top:1px solid var(--soft)}
+
+  .overlay{display:none;position:absolute;inset:0;background:rgba(30,22,45,.42);z-index:30;padding:40px 16px}
+  .overlay.on{display:block}
+  .modal{max-width:520px;margin:0 auto;background:#fff;border-radius:16px;padding:26px 28px}
+  .modal h2{font-size:17px;margin:0 0 4px}
+  .modal .m-sub{font-size:12px;color:var(--ink3);margin-bottom:20px}
+  .pin-row{display:flex;gap:9px;margin-bottom:14px}
+  .pin-row input{flex:1;padding:9px 12px;border:1px solid var(--line);border-radius:9px;outline:none}
+  .p-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--soft);font-size:13px}
+  .p-row .t{flex:1}
+  .p-row .d{font-size:11px;color:var(--ink3)}
+  .switch{width:40px;height:23px;border-radius:20px;background:var(--line);border:0;position:relative;flex:none}
+  .switch:after{content:"";position:absolute;left:3px;top:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:.2s}
+  .switch.on{background:var(--brand)}
+  .switch.on:after{left:20px}
+  .p-actions{display:flex;gap:9px;margin-top:20px;flex-wrap:wrap}
+  .lock-msg{font-size:12px;color:var(--pink);margin:0 0 12px}
+  footer{border-top:1px solid var(--line);background:var(--card);padding:16px 0 26px}
+  .comp{display:flex;gap:8px;flex-wrap:wrap}
+  .comp span{font-size:11px;color:var(--ink2);background:var(--bg);border:1px solid var(--line);padding:5px 10px;border-radius:20px}
+  .comp span.g{color:var(--ok);background:var(--ok-soft);border-color:#BFE7D8}
+  .comp .lead{font-size:11px;color:var(--ink3);background:none;border:0;padding:5px 4px}
+  .fine{font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.8}
+  @media(max-width:980px){.grid{grid-template-columns:1fr 1fr}.pet-card{grid-column:1/-1}}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="head">
+  <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><ellipse cx="13" cy="12" rx="8" ry="6" fill="#AFA9EC"/><path d="m6 12-4-4v8l4-4Z" fill="#7F77DD"/><circle cx="17" cy="10.5" r="1.2" fill="#26215C"/></svg></div>
+  <div class="brand"><b>小胖鱼陪练</b><span>家庭版 · 家长订阅</span></div>
+  <div class="right">
+    <span class="tag">游戏化最重的一款</span>
+    <span class="tag gray">演示数据</span>
+    <button class="btn-parent" id="openParent">家长中心</button>
+    <a class="back" href="index.html">← 全部产品</a>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <p class="intro"><b>方向 03 · 你最初想的那套，全放在这一款里。</b> 宠物跳舞、攒星星、换装商店、连续打卡 —— 面向 C 端孩子才有意义。但代价也最大：未成年人信息合规、内容持续供给、家长获客，全都压在这一款上。所以我把合规做成了产品的一部分，而不是事后补。</p>
+
+  <div class="grid">
+    <div class="card pet-card">
+      <h2>我的小胖鱼</h2>
+      <p class="sub" id="petName">当前装扮：原样</p>
+      <div class="pet-stage" id="stage">
+        <svg viewBox="0 0 200 168" aria-label="小胖鱼">
+          <rect id="petBg" x="0" y="0" width="200" height="168" fill="#EEEDFE" rx="0"/>
+          <g id="bubbles" style="display:none"><circle cx="30" cy="40" r="6" fill="#fff" opacity=".7"/><circle cx="42" cy="26" r="4" fill="#fff" opacity=".55"/><circle cx="24" cy="22" r="3" fill="#fff" opacity=".5"/></g>
+          <g id="tailG"><path id="petTail" d="M62 84 L22 58 L30 84 L22 110 Z" fill="#7F77DD"/></g>
+          <ellipse cx="115" cy="84" rx="60" ry="44" fill="#AFA9EC"/>
+          <ellipse cx="120" cy="97" rx="46" ry="26" fill="#CECBF6" opacity=".8"/>
+          <path d="M104 42 Q115 24 128 42" stroke="#7F77DD" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <circle cx="143" cy="73" r="8" fill="#fff"/><circle cx="145" cy="73" r="4" fill="#26215C"/>
+          <path d="M150 96 Q158 102 166 96" stroke="#534AB7" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <circle cx="136" cy="98" r="5" fill="#F4C0D1" opacity=".75"/>
+          <g id="hat" style="display:none"><path d="M118 40 L138 40 L128 18 Z" fill="#F0997B"/><rect x="112" y="38" width="32" height="6" rx="3" fill="#D85A30"/></g>
+          <path id="sparkle" d="M0 0" fill="none"/>
+        </svg>
+      </div>
+      <div class="pet-words" id="petWords">小胖鱼在等你。<b>今天想从哪一关开始？</b></div>
+      <div class="equipped" id="equipped"></div>
+      <div class="streak"><span>连续来了</span><b>4</b><span>天 ｜ 本次已用 7 分钟 / 上限 20 分钟</span></div>
+    </div>
+
+    <div class="card">
+      <div class="q-top">
+        <span class="chip b">L2 · 第 1/3 题</span>
+        <span class="chip">选择题</span>
+        <span class="chip a" id="starChip">★★☆☆☆ 2 星</span>
+      </div>
+      <p class="q-text" id="qText">扫地机器人走到墙前面会自己拐弯。它最可能是靠什么知道前面有东西的？</p>
+      <div class="opts" id="opts"></div>
+      <div class="actions">
+        <button class="btn" id="submitBtn" disabled>选好了</button>
+        <button class="btn ghost sm" id="skipBtn">这题不会</button>
+        <span class="act-tip" id="actTip">不计时，也不会扣分</span>
+      </div>
+      <div class="result" id="result"></div>
+      <div class="map-mini"><div class="done">L1 ✓</div><div class="now">L2 进行中</div><div>L3</div><div>L4</div><div>L5</div></div>
+    </div>
+
+    <div class="card">
+      <h2>星星小铺</h2>
+      <p class="sub">只换装扮，不换分数</p>
+      <div class="star-box"><span class="n" id="starNum">12</span><span class="u">★ 可用</span></div>
+      <div id="shop"></div>
+      <div class="shop-note">
+        星星只能靠答题获得，<b>不能充值购买</b>；商店里没有抽奖、没有限量、没有排行榜，也不出现任何广告。装扮只是给自己看的，不影响题目难度。
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer><div class="wrap">
+  <div class="comp">
+    <span class="lead">上线前必须落地</span>
+    <span class="g">监护人单独同意</span>
+    <span class="g">仅收集必要信息</span>
+    <span class="g">不设公开排名 / 无社交</span>
+    <span class="g">单次时长上限</span>
+    <span class="g">不诱导未成年人消费</span>
+    <span>教育 App 备案 / 等保：待办</span>
+  </div>
+  <div class="fine">原型说明：单文件静态演示，数据只存在当前页面内存里，刷新即还原；无后端、无真实账户、无支付。虚拟物品只允许用答题所得星星兑换，不提供任何充值入口。</div>
+</div></footer>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2>家长中心</h2>
+    <p class="m-sub">演示 PIN：1234</p>
+    <div id="lockView">
+      <p class="lock-msg" id="lockMsg"></p>
+      <div class="pin-row"><input type="password" id="pin" placeholder="输入 4 位家长 PIN"><button class="btn" id="pinBtn" style="width:auto;margin:0">进入</button></div>
+      <p style="font-size:11px;color:var(--ink3)">孩子端看不到这一页；时长、同意开关和数据都在这里管。</p>
+    </div>
+    <div id="parentView" style="display:none">
+      <div class="p-row"><div class="t">单次使用时长上限<div class="d">到点自动收尾，不强制中断当前题</div></div><button class="switch on" id="swTime"></button></div>
+      <div class="p-row"><div class="t">监护人同意<div class="d">已记录同意时间与版本，可随时撤回</div></div><button class="switch on" id="swConsent"></button></div>
+      <div class="p-row"><div class="t">学习记录<div class="d">仅保留答题对错与薄弱点，不含位置、通讯录、人脸</div></div><button class="btn ghost sm" id="exportBtn">导出</button></div>
+      <div class="p-row"><div class="t">删除全部数据<div class="d">包括星星、装扮和全部答题记录</div></div><button class="btn ghost sm" id="deleteBtn">删除</button></div>
+      <div class="p-actions"><button class="btn" id="closeParent" style="width:auto">返回</button><span class="act-tip" id="parentTip"></span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  function $(id){return document.getElementById(id);}
+
+  var questions=[
+    {text:'扫地机器人走到墙前面会自己拐弯。它最可能是靠什么知道前面有东西的？',
+     opts:['A. 它记住了家里地图上的每一面墙','B. 传感器发出信号再收回来，算出距离','C. 墙会发出声音告诉它','D. 它每次都随便试试'],
+     ans:1,
+     why:'传感器把发出到收到回波的时间换成距离，机器才知道「前面有东西」。选 A 也挺有想法，但换个家具位置就露馅了 —— 靠死记地图应付不了变化。',stars:2},
+    {text:'同一面墙，换成软软的窗帘，机器人有时就直接撞上去了。最可能的原因是？',
+     opts:['A. 窗帘把声波吸掉或散射了，回波没回来','B. 机器人今天没睡醒','C. 电池电压太高','D. 程序语言太旧'],
+     ans:0,
+     why:'软材料会吸收声波，斜面会把声波反射到别处，传感器就收不到回波。这是真实课堂里最常见的故障，先查环境和安装，别急着改代码。',stars:3}
+  ];
+
+  var shop=[
+    {id:'hat',name:'小草帽',desc:'戴在头顶',cost:6,ico:'△'},
+    {id:'bubbles',name:'一串气泡',desc:'身边飘着',cost:10,ico:'○'},
+    {id:'tail',name:'渐变尾巴',desc:'换个尾鳍颜色',cost:14,ico:'≈'},
+    {id:'bg',name:'星空背景',desc:'换整片背景',cost:20,ico:'✦'}
+  ];
+
+  var state={q:0,choice:null,answered:false,stars:12,owned:[],wearing:[],correct:0};
+
+  function renderQuestion(){
+    var q=questions[state.q];
+    state.choice=null;state.answered=false;
+    $('qText').textContent=q.text;
+    $('starChip').textContent='★'.repeat(q.stars)+'☆'.repeat(5-q.stars)+' '+q.stars+' 星';
+    $('opts').innerHTML=q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'"><span class="k">'+'ABCD'[i]+'</span><span>'+o.slice(3)+'</span></button>';
+    }).join('');
+    $('submitBtn').disabled=true;
+    $('submitBtn').textContent='选好了';
+    $('actTip').textContent='不计时，也不会扣分';
+    $('result').className='result';
+    $('result').innerHTML='';
+  }
+
+  function answer(gaveUp){
+    if(state.answered)return;
+    if(!gaveUp&&state.choice===null)return;
+    state.answered=true;
+    var q=questions[state.q];
+    var correct=!gaveUp&&state.choice===q.ans;
+    var opts=$('opts').querySelectorAll('.opt');
+    Array.prototype.forEach.call(opts,function(b,i){
+      if(i===q.ans)b.classList.add('right');
+      else if(i===state.choice)b.classList.add('wrong');
+      b.disabled=true;
+    });
+    var r=$('result');
+    if(correct){
+      state.stars+=q.stars;state.correct+=1;
+      r.className='result ok on';
+      r.innerHTML='<b>答对了。</b><br>'+q.why+'<div class="gain">★ +'+q.stars+' ｜ 现在有 '+state.stars+' 颗</div>';
+      $('petWords').innerHTML='<b>小胖鱼摆了摆尾巴。</b> 这道 '+(q.stars>=3?'3 星':'2 星')+' 题你一次就过了，刚才那句解释讲得挺清楚。';
+      var s=$('stage');s.classList.remove('dance');void s.offsetWidth;s.classList.add('dance');
+      setTimeout(function(){s.classList.remove('dance');},1600);
+    }else if(gaveUp){
+      r.className='result no on';
+      r.innerHTML='<b>没事，先看讲解。</b><br>'+q.why+'<div class="gain">这题记进待复习了，不扣星星</div>';
+      $('petWords').innerHTML='小胖鱼陪你一起看讲解。<b>不会就说不会，比蒙一个强。</b>';
+    }else{
+      r.className='result no on';
+      r.innerHTML='<b>再想想，正确是 '+'ABCD'[q.ans]+'。</b><br>'+q.why+'<div class="gain">不扣星星，这题记进待复习</div>';
+      $('petWords').innerHTML='错一次不亏。<b>关键是把「为什么」补上。</b>';
+    }
+    $('submitBtn').textContent='下一题';
+    $('submitBtn').disabled=false;
+    $('actTip').textContent='';
+    renderShop();
+  }
+
+  function renderShop(){
+    $('starNum').textContent=state.stars;
+    $('shop').innerHTML=shop.map(function(it){
+      var owned=state.owned.indexOf(it.id)>=0;
+      var wearing=state.wearing.indexOf(it.id)>=0;
+      var can=owned||state.stars>=it.cost;
+      var label=wearing?'已穿戴':(owned?'穿戴':(can?it.cost+' ★ 兑换':'还差 '+(it.cost-state.stars)));
+      var cls=wearing?'wear':(can?'can':'');
+      return '<div class="shop-item"><div class="shop-ico">'+it.ico+'</div><div><div class="shop-t">'+it.name+'</div><div class="shop-d">'+it.desc+'</div></div>'+
+        '<button class="'+cls+'" data-buy="'+it.id+'" '+(can?'':'disabled')+'>'+label+'</button></div>';
+    }).join('');
+    $('equipped').innerHTML=state.wearing.length
+      ? state.wearing.map(function(id){var it=shop.filter(function(x){return x.id===id;})[0];return '<span>'+it.name+'</span>';}).join('')
+      : '<span>还没换装扮</span>';
+    $('petName').textContent=state.wearing.length?'当前装扮：'+state.wearing.map(function(id){return shop.filter(function(x){return x.id===id;})[0].name;}).join(' + '):'当前装扮：原样';
+  }
+
+  function applyLook(){
+    $('hat').style.display=state.wearing.indexOf('hat')>=0?'':'none';
+    $('bubbles').style.display=state.wearing.indexOf('bubbles')>=0?'':'none';
+    $('petTail').setAttribute('fill',state.wearing.indexOf('tail')>=0?'#D4537E':'#7F77DD');
+    $('petBg').setAttribute('fill',state.wearing.indexOf('bg')>=0?'#2C2450':'#EEEDFE');
+  }
+
+  $('opts').addEventListener('click',function(e){
+    var b=e.target.closest('.opt');if(!b||state.answered)return;
+    state.choice=parseInt(b.getAttribute('data-i'),10);
+    Array.prototype.forEach.call($('opts').querySelectorAll('.opt'),function(x){x.classList.remove('on');});
+    b.classList.add('on');
+    $('submitBtn').disabled=false;
+  });
+  $('submitBtn').addEventListener('click',function(){
+    if(state.answered){state.q=(state.q+1)%questions.length;renderQuestion();}
+    else answer(false);
+  });
+  $('skipBtn').addEventListener('click',function(){answer(true);});
+
+  $('shop').addEventListener('click',function(e){
+    var b=e.target.closest('[data-buy]');if(!b||b.disabled)return;
+    var id=b.getAttribute('data-buy');
+    var it=shop.filter(function(x){return x.id===id;})[0];
+    if(state.owned.indexOf(id)<0){
+      if(state.stars<it.cost)return;
+      state.stars-=it.cost;state.owned.push(id);state.wearing.push(id);
+    }else{
+      var i=state.wearing.indexOf(id);
+      if(i>=0)state.wearing.splice(i,1);else state.wearing.push(id);
+    }
+    applyLook();renderShop();
+  });
+
+  $('openParent').addEventListener('click',function(){$('overlay').classList.add('on');});
+  $('closeParent').addEventListener('click',function(){$('overlay').classList.remove('on');});
+  $('overlay').addEventListener('click',function(e){if(e.target===$('overlay'))$('overlay').classList.remove('on');});
+  $('pinBtn').addEventListener('click',function(){
+    if($('pin').value==='1234'){
+      $('lockView').style.display='none';$('parentView').style.display='block';$('lockMsg').textContent='';
+    }else{$('lockMsg').textContent='PIN 不对，演示用 1234';}
+  });
+  ['swTime','swConsent'].forEach(function(id){
+    $(id).addEventListener('click',function(){this.classList.toggle('on');});
+  });
+  $('exportBtn').addEventListener('click',function(){
+    var data={note:'演示导出：仅含答题对错与薄弱点',stars:state.stars,correct:state.correct,owned:state.owned};
+    var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='learning-record.json';a.click();
+    $('parentTip').textContent='已导出';
+  });
+  $('deleteBtn').addEventListener('click',function(){
+    state.stars=0;state.owned=[];state.wearing=[];state.correct=0;
+    applyLook();renderShop();
+    $('parentTip').textContent='已清空本页全部演示数据';
+  });
+
+  renderQuestion();renderShop();applyLook();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>硬科技闯关营 · 系统软件层</title>
+<style>
+  :root{
+    --bg:#F4F6F7;--card:#fff;--line:#DDE4E7;--soft:#EDF1F2;
+    --ink:#1C282C;--ink2:#55656A;--ink3:#8A979B;
+    --brand:#0B5C57;--brand-soft:#E0F2EE;--brand-ink:#084742;
+    --amber:#A66B12;--amber-soft:#FAEEDA;
+    --code-bg:#1E2B30;--code-fg:#D6E4E6;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.65 var(--font)}
+  button,textarea,select{font-family:inherit;font-size:inherit}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+  header{background:var(--card);border-bottom:1px solid var(--line)}
+  .head{max-width:1160px;margin:0 auto;padding:17px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .mark{width:34px;height:34px;border-radius:9px;background:var(--brand-soft);display:grid;place-items:center;font:600 14px var(--mono);color:var(--brand)}
+  .brand b{font-size:16px;font-weight:600}
+  .brand span{display:block;font-size:12px;color:var(--ink3);margin-top:-2px}
+  .head .right{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .tag{font-size:11px;padding:5px 11px;border-radius:20px;background:var(--brand-soft);color:var(--brand-ink)}
+  .tag.gray{background:var(--bg);color:var(--ink3);border:1px solid var(--line)}
+  a.back{font-size:12px;color:var(--brand);text-decoration:none}
+  main{padding:24px 0 44px}
+  .intro{margin:0 0 18px;color:var(--ink2);font-size:13px}
+  .intro b{color:var(--ink)}
+  .grid{display:grid;grid-template-columns:290px 1fr;gap:18px;align-items:start}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px}
+  .card h2{font-size:14px;font-weight:600;margin:0 0 3px}
+  .card .sub{font-size:12px;color:var(--ink3);margin:0 0 16px}
+  .mod{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:1px solid transparent;background:none;padding:9px 10px;border-radius:9px;color:var(--ink2);cursor:pointer}
+  .mod:hover{background:var(--bg)}
+  .mod.now{background:var(--brand-soft);border-color:#B9DFD6;color:var(--brand-ink);font-weight:600}
+  .mod .n{font:600 11px var(--mono);width:24px;height:24px;border-radius:6px;background:var(--bg);display:grid;place-items:center;flex:none}
+  .mod.now .n{background:var(--brand);color:#fff}
+  .mod .t{font-size:13px}
+  .mod .s{display:block;font-size:11px;color:var(--ink3);font-weight:400}
+  .divider{height:1px;background:var(--soft);margin:18px 0}
+  .term{width:100%;border-collapse:collapse;font-size:11px}
+  .term th{text-align:left;color:var(--ink3);font-weight:500;padding:5px 6px;border-bottom:1px solid var(--line)}
+  .term td{padding:6px;border-bottom:1px solid var(--soft);vertical-align:top;color:var(--ink2)}
+  .term td:first-child{font-family:var(--mono);color:var(--brand-ink);white-space:nowrap}
+  .mini{font-size:11px;color:var(--ink3);margin:9px 0 0;line-height:1.7}
+  .progress{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink2)}
+  .progress .bar{flex:1;height:7px;background:var(--line);border-radius:6px;overflow:hidden}
+  .progress .bar i{display:block;height:100%;background:var(--brand);width:32%;transition:width .4s}
+
+  .q-top{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .chip{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--bg);border:1px solid var(--line);color:var(--ink2)}
+  .chip.b{background:var(--brand-soft);border-color:#B9DFD6;color:var(--brand-ink);font-weight:600}
+  .chip.a{background:var(--amber-soft);border-color:#F0D9AE;color:var(--amber)}
+  .q-text{font-size:16px;font-weight:500;line-height:1.7;margin:0 0 6px}
+  .q-note{font-size:12px;color:var(--ink3);margin:0 0 18px}
+  .step{font-size:12px;color:var(--ink2);margin:0 0 8px;font-weight:600}
+  pre{background:var(--code-bg);color:var(--code-fg);font:12.5px/1.7 var(--mono);padding:13px 15px;border-radius:9px;overflow-x:auto;margin:0 0 9px;white-space:pre-wrap;word-break:break-all}
+  pre .c{color:#7FA8A2}
+  textarea{width:100%;min-height:88px;padding:12px 14px;border:1px solid var(--line);border-radius:9px;background:#FCFDFD;font:12.5px/1.7 var(--mono);color:var(--ink);resize:vertical;outline:none}
+  textarea:focus{border-color:var(--brand)}
+  .actions{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--brand);background:var(--brand);color:#fff;padding:8px 18px;border-radius:8px;font-weight:600;font-size:13px}
+  .btn:hover{background:var(--brand-ink)}
+  .btn.ghost{background:#fff;color:var(--ink2);border-color:var(--line)}
+  .btn.sm{padding:6px 12px;font-size:12px}
+  .fill{font-size:11px;color:var(--brand);text-decoration:underline;background:none;border:0;padding:0;cursor:pointer}
+  .verdict{display:none;margin-top:18px;border-radius:10px;padding:15px 17px;font-size:13px;line-height:1.8}
+  .verdict.on{display:block}
+  .verdict.ok{background:var(--brand-soft);color:var(--brand-ink)}
+  .verdict.warn{background:var(--amber-soft);color:#6B4708}
+  .verdict b{display:block;font-size:14px;margin-bottom:5px}
+  .verdict code{font-family:var(--mono);font-size:12px}
+  .nextline{margin-top:9px;padding-top:9px;border-top:1px solid rgba(0,0,0,.08);font-size:12px}
+  .talk{display:none;margin-top:16px;background:#FCFDFD;border:1px solid var(--line);border-radius:10px;padding:16px 18px;font-size:13px;line-height:1.85}
+  .talk.on{display:block}
+  .talk h3{font-size:13px;margin:0 0 9px;color:var(--brand-ink)}
+  .talk .lbl{display:inline-block;font-size:11px;color:var(--ink3);background:var(--bg);border-radius:5px;padding:2px 7px;margin-right:6px}
+  .mastery{display:grid;gap:9px;margin-top:4px}
+  .m-row{display:grid;grid-template-columns:110px 1fr 38px;gap:10px;align-items:center;font-size:12px}
+  .m-row .track{height:8px;background:var(--soft);border-radius:6px;overflow:hidden}
+  .m-row .track i{display:block;height:100%;background:var(--brand);border-radius:6px;transition:width .4s}
+  .m-row .pct{text-align:right;color:var(--ink2);font-variant-numeric:tabular-nums}
+  footer{border-top:1px solid var(--line);background:var(--card);padding:16px 0 26px}
+  .comp{display:flex;gap:8px;flex-wrap:wrap}
+  .comp span{font-size:11px;color:var(--ink2);background:var(--bg);border:1px solid var(--line);padding:5px 10px;border-radius:20px}
+  .comp span.g{color:var(--brand);background:var(--brand-soft);border-color:#B9DFD6}
+  .comp .lead{font-size:11px;color:var(--ink3);background:none;border:0;padding:5px 4px}
+  .fine{font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.8}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="head">
+  <div class="mark">M1</div>
+  <div class="brand"><b>硬科技闯关营</b><span>系统软件层 · 从原理到实机</span></div>
+  <div class="right">
+    <span class="tag">成人 / 职教向</span>
+    <span class="tag gray">演示数据</span>
+    <a class="back" href="index.html">← 全部产品</a>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <p class="intro"><b>方向 02 · 内容一行不用改。</b> 现有学习记录里的 NPU、PCIe、RDMA、Triton、运行时层内容，直接就是课程包；受众换成转行的人、应届生和企业内训。成年人意味着没有双减、没有监护人同意、没有未成年人敏感信息 —— 而你自己就是最懂这批用户的那个人。</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>课程地图</h2>
+      <p class="sub">5 个模块 · 16 关</p>
+      <div id="mods"></div>
+      <div class="divider"></div>
+      <div class="progress"><span>总进度</span><span class="bar"><i id="totalBar"></i></span><span id="totalTxt">32%</span></div>
+      <div class="divider"></div>
+      <h2>术语对照表</h2>
+      <p class="sub">本模块新出现的缩写，先给全称再讲正文</p>
+      <table class="term">
+        <tr><th>缩写</th><th>全称 / 作用</th></tr>
+        <tr><td>PCIe</td><td>Peripheral Component Interconnect Express，外围组件高速互连总线</td></tr>
+        <tr><td>GT/s</td><td>Giga Transfers per second，每秒千兆次传输（不是 GB/s）</td></tr>
+        <tr><td>LnkSta</td><td>Link Status，链路状态寄存器字段</td></tr>
+        <tr><td>cnrt</td><td>Cambricon Runtime Library，寒武纪运行时库</td></tr>
+        <tr><td>cnmon</td><td>设备监控命令行工具，作用类似 nvidia-smi</td></tr>
+      </table>
+      <p class="mini">缩写隔两关会再复述一次，不假设你记得。M5 超节点部分涉及公司内网信息，课程只给公开原理框架，具体参数留给你在实机上核实。</p>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="q-top">
+          <span class="chip b" id="taskLv">M1 · L3 第 1/2 题</span>
+          <span class="chip">实机验证题</span>
+          <span class="chip a">★★★★☆ 4 星</span>
+        </div>
+        <p class="q-text" id="taskTitle">你的加速卡，实际协商在哪个 PCIe 速率和宽度？</p>
+        <p class="q-note" id="taskNote">不要背规格书，去机器上把链路状态读出来，再算一遍单向理论带宽。</p>
+
+        <div class="step">① 先找到设备号</div>
+        <pre><span class="c"># 在装有加速卡的机器上执行</span>
+lspci | grep -i -E 'cambricon|nvidia|vga|3d|processing'</pre>
+
+        <div class="step">② 读链路状态（-s 后面换成上一步查到的号）</div>
+        <pre>lspci -vv -s 07:00.0 | grep -A2 -i 'LnkSta:'</pre>
+
+        <div class="step">③ 把输出原样贴回来</div>
+        <textarea id="paste" placeholder="例如：&#10;LnkSta: Speed 16GT/s (ok), Width x16 (ok)&#10;TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-"></textarea>
+
+        <div class="actions">
+          <button class="btn" id="verifyBtn">提交验证</button>
+          <button class="fill" id="fillBtn">贴一份示例输出</button>
+          <button class="btn ghost sm" id="talkBtn" disabled>生成面试话术</button>
+        </div>
+
+        <div class="verdict" id="verdict"></div>
+        <div class="talk" id="talk"></div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2>掌握度</h2>
+        <p class="sub">按能力维度，不按做题数量</p>
+        <div class="mastery" id="mastery"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer><div class="wrap">
+  <div class="comp">
+    <span class="lead">这条路省掉的东西</span>
+    <span class="g">不受双减学科培训约束</span>
+    <span class="g">无未成年人敏感信息</span>
+    <span class="g">无需家长同意 / 时长锁</span>
+    <span class="g">内容已存在，不用从零生产</span>
+    <span>继续教育类 App 备案边界：待核实</span>
+  </div>
+  <div class="fine">原型说明：单文件静态演示，仅 M1 开放完整交互，命令为通用 Linux 工具、不含任何公司内部信息。「继续教育类 App 是否需教育移动应用备案」目前只查到二手口径，正式立项前需向属地教育行政部门确认。带宽数值按 128b/130b 编码效率估算，实际以实机为准。</div>
+</div></footer>
+
+<script>
+(function(){
+  'use strict';
+  function $(id){return document.getElementById(id);}
+
+  var mods=[
+    {n:'M1',t:'总线与设备互联',s:'PCIe 链路、带宽、拓扑',open:true},
+    {n:'M2',t:'显存与带宽',s:'Roofline、访存瓶颈'},
+    {n:'M3',t:'集合通信',s:'RDMA / RoCE / AllReduce'},
+    {n:'M4',t:'运行时与驱动层',s:'cnrt / cnmon 测试视角'},
+    {n:'M5',t:'超节点',s:'公开原理框架 + 实机核实'}
+  ];
+  var mastery=[['链路状态读取',0],['带宽换算',0],['异常排查链',0],['追问答辩',0]];
+  var passed=false;
+
+  function renderMods(){
+    $('mods').innerHTML=mods.map(function(m,i){
+      return '<button class="mod '+(i===0?'now':'')+'" data-m="'+i+'"><span class="n">'+m.n+'</span><span class="t">'+m.t+'<span class="s">'+m.s+'</span></span></button>';
+    }).join('');
+  }
+
+  function renderMastery(){
+    $('mastery').innerHTML=mastery.map(function(r,i){
+      var v=i===0?92:(i===1?74:(i===2?55:38));
+      return '<div class="m-row"><span>'+r[0]+'</span><span class="track"><i style="width:'+v+'%"></i></span><span class="pct">'+v+'%</span></div>';
+    }).join('');
+  }
+
+  function verify(){
+    var raw=$('paste').value.trim();
+    var v=$('verdict');
+    if(!raw){
+      v.className='verdict warn on';
+      v.innerHTML='<b>还没贴输出</b>先去机器上跑一下那两条命令。没实机在手也可以点「贴一份示例输出」看判定逻辑长什么样。';
+      return;
+    }
+    var speed=raw.match(/Speed\s+(\d+(?:\.\d+)?)\s*GT\/s/i);
+    var width=raw.match(/Width\s+x(\d+)/i);
+    if(!speed||!width){
+      v.className='verdict warn on';
+      v.innerHTML='<b>没识别到 LnkSta 字段</b>输出里要有 <code>Speed ...GT/s</code> 和 <code>Width xN</code>。常见原因：<code>-s</code> 后面的设备号不对，或者 grep 把那行滤掉了。<div class="nextline">排查链：设备号 → 是否有权限（试试 sudo）→ 是不是虚拟机里看不到直通设备。</div>';
+      return;
+    }
+    var gt=parseFloat(speed[1]), lanes=parseInt(width[1],10);
+    var gen={'2.5':'PCIe 1.x','5':'PCIe 2.x','8':'PCIe 3.0','16':'PCIe 4.0','32':'PCIe 5.0'}[String(gt)]||('约 '+gt+' GT/s 的代际');
+    var gb=(gt*(128/130)/8*lanes).toFixed(2);
+    var half=lanes<16;
+    v.className='verdict ok on';
+    v.innerHTML='<b>判定：输出符合预期</b>'+
+      '读到 <code>Speed '+gt+' GT/s</code>、<code>Width x'+lanes+'</code>，对应 <strong>'+gen+' ×'+lanes+'</strong>。'+
+      '按 128b/130b 编码效率算，单向理论带宽约 <strong>'+gb+' GB/s</strong> —— 注意这是主机和设备之间的链路上限，不是卡内访存带宽，两者别混。'+
+      '<div class="nextline">'+(half
+        ? '宽度只有 ×'+lanes+'，不在满宽上。往下追问：插槽是不是共享通道、BIOS 里是否做了拆分、有没有插在次级插槽。'
+        : '下一步追问：为什么实测 DMA 拷贝跑不到这个数（页锁定内存、分块大小、跨 NUMA）；多卡时同一 switch 下 P2P 是否可用。')+
+      '</div>';
+    passed=true;
+    $('talkBtn').disabled=false;
+    mastery[0][1]=1;mastery[1][1]=1;
+    $('totalBar').style.width='38%';$('totalTxt').textContent='38%';
+  }
+
+  function talk(){
+    if(!passed)return;
+    var t=$('talk');
+    t.className='talk on';
+    t.innerHTML='<h3>可以直接开口讲的一条（已挂实机佐证）</h3>'+
+      '<p><span class="lbl">一句结论</span>我机器上加速卡协商在 PCIe 4.0 ×16，单向理论带宽约 31.5 GB/s；这是 host 与 device 之间的上限，不是卡内 HBM 带宽。</p>'+
+      '<p><span class="lbl">可被追问三层</span>① GT/s 和 GB/s 差在哪 → 128b/130b 编码开销；② 实测为什么跑不满 → 页锁定内存、DMA 分块、跨 NUMA；③ 多卡拓扑怎么影响 → 是否同一 PCIe switch、P2P 是否可用。</p>'+
+      '<p><span class="lbl">实机佐证</span><code>lspci -vv</code> 的 LnkSta 两行，2026-11-05 本机贴回并判定符合预期。</p>'+
+      '<p style="font-size:11px;color:var(--ink3);margin-bottom:0">M5 超节点相关的内部参数无法也不该写进这里；课程只给公开原理框架，具体数值需要你在实机 / 内网核实后自己补上这一栏。</p>';
+    t.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  $('mods').addEventListener('click',function(e){
+    var b=e.target.closest('[data-m]');if(!b)return;
+    var i=parseInt(b.getAttribute('data-m'),10);
+    if(i!==0){
+      var v=$('verdict');v.className='verdict warn on';
+      v.innerHTML='<b>'+mods[i].n+' '+mods[i].t+'：演示版未开放</b>这个原型只做通了 M1 的「实机贴回 → 自动判定 → 生成话术」闭环。其余模块按同样的四拍结构接入课程包即可。';
+    }
+  });
+  $('verifyBtn').addEventListener('click',verify);
+  $('fillBtn').addEventListener('click',function(){
+    $('paste').value='LnkSta: Speed 16GT/s (ok), Width x16 (ok)\nTrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-';
+  });
+  $('talkBtn').addEventListener('click',talk);
+
+  renderMods();renderMastery();
+})();
+</script>
+</body>
+</html>

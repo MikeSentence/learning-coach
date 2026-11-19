@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>四款产品方向 · 对比总览</title>
+<style>
+  :root{
+    --bg:#F6F8F9;--card:#fff;--line:#E3E9EB;--soft:#EEF2F3;
+    --ink:#1E272B;--ink2:#56646A;--ink3:#8B989D;
+    --blue:#185FA5;--teal:#0B5C57;--purple:#6C5FC0;--green:#0F6E56;
+    --amber:#BA7517;--amber-soft:#FAEEDA;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.65 var(--font)}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:30px 0 26px}
+  .kicker{font-size:11px;letter-spacing:1.4px;color:var(--ink3);margin-bottom:9px}
+  h1{font-size:25px;font-weight:600;margin:0 0 9px;letter-spacing:-.3px}
+  .lede{font-size:13px;color:var(--ink2);margin:0;max-width:760px;line-height:1.85}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .meta span{font-size:11px;color:var(--ink3);background:var(--bg);border:1px solid var(--line);padding:4px 10px;border-radius:20px}
+  main{padding:28px 0 46px}
+  h2.sec{font-size:15px;font-weight:600;margin:0 0 4px}
+  .sec-sub{font-size:12px;color:var(--ink3);margin:0 0 18px}
+
+  .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:.18s}
+  .pcard:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(20,40,45,.07)}
+  .stripe{height:4px}
+  .pcard .in{padding:19px 21px 20px;display:flex;flex-direction:column;flex:1}
+  .phead{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}
+  .num{font-size:11px;font-weight:600;color:#fff;padding:3px 8px;border-radius:6px;flex:none;margin-top:3px}
+  .ptitle{font-size:16px;font-weight:600;margin:0}
+  .ptype{font-size:11px;color:var(--ink3);display:block;font-weight:400;margin-top:1px}
+  .rec{margin-left:auto;font-size:10px;padding:4px 9px;border-radius:20px;background:var(--amber-soft);color:var(--amber);white-space:nowrap;font-weight:600}
+  .rec.gray{background:var(--bg);color:var(--ink3);font-weight:400}
+  .oneline{font-size:13px;color:var(--ink2);line-height:1.8;margin:0 0 14px;min-height:46px}
+  .kv{display:grid;grid-template-columns:62px 1fr;gap:5px 10px;font-size:12px;margin-bottom:14px}
+  .kv .k{color:var(--ink3)}
+  .kv .v{color:var(--ink2)}
+  .pfoot{margin-top:auto;display:flex;align-items:center;gap:9px;padding-top:13px;border-top:1px solid var(--soft)}
+  .open{border:1px solid var(--line);background:#fff;color:var(--ink);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600}
+  .open:hover{border-color:var(--ink2)}
+  .fname{font-size:10px;color:var(--ink3);font-family:"SFMono-Regular",Consolas,monospace}
+
+  .matrix{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-top:30px;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:12px;min-width:720px}
+  th{text-align:left;font-weight:500;color:var(--ink3);padding:9px 10px;border-bottom:1px solid var(--line);font-size:11px;white-space:nowrap}
+  td{padding:11px 10px;border-bottom:1px solid var(--soft);color:var(--ink2);vertical-align:top;line-height:1.65}
+  tbody tr:last-child td{border-bottom:0}
+  td:first-child{font-weight:600;color:var(--ink);white-space:nowrap}
+  .good{color:var(--green);font-weight:600}
+  .mid{color:var(--amber)}
+  .bad{color:#A32D2D}
+
+  .advice{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:19px 21px}
+  .box h3{font-size:14px;font-weight:600;margin:0 0 10px}
+  .box p{font-size:12.5px;color:var(--ink2);line-height:1.85;margin:0 0 9px}
+  .box ol{margin:0;padding-left:18px;font-size:12.5px;color:var(--ink2);line-height:1.9}
+  .box b{color:var(--ink)}
+  .engine{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+  .engine span{font-size:11px;color:var(--ink2);background:var(--bg);border:1px solid var(--line);padding:5px 10px;border-radius:7px}
+  .engine i{font-style:normal;color:var(--ink3)}
+
+  footer{border-top:1px solid var(--line);background:var(--card);padding:18px 0 30px}
+  .fine{font-size:11px;color:var(--ink3);line-height:1.85}
+  @media(max-width:820px){.cards,.advice{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="kicker">learning-coach · 产品方向探索</div>
+  <h1>同一套闯关引擎，四种卖法</h1>
+  <p class="lede">不是四款换皮的产品，而是<b>客户不同、付钱的人不同、内容从哪来不同、合规压力差好几倍</b>的四条路。每款都是能点开操作的静态原型，先逛一遍再决定往哪投。</p>
+  <div class="meta"><span>2026-11-05</span><span>4 款可交互原型</span><span>均为单文件静态演示 · 无后端</span><span>已核实政策口径见原型底部</span></div>
+</div></header>
+
+<main class="wrap">
+  <h2 class="sec">四款摆在这儿</h2>
+  <p class="sec-sub">点「打开原型」进演示；卡片右下角是文件名，也可以直接单独发给别人看。</p>
+
+  <div class="cards">
+
+    <div class="pcard">
+      <div class="stripe" style="background:var(--blue)"></div>
+      <div class="in">
+        <div class="phead"><span class="num" style="background:var(--blue)">01</span><div><p class="ptitle">备课教练<span class="ptype">教师出题工作台 · B2B 轻量</span></p></div><span class="rec">最推荐先试</span></div>
+        <p class="oneline">输入一个知识点，AI 起草关卡地图和分层题目，老师逐题复核后导出讲义。<b>系统里根本没有学生。</b></p>
+        <div class="kv">
+          <span class="k">客户</span><span class="v">兴趣班 / 机构老师个人</span>
+          <span class="k">谁付钱</span><span class="v">老师订阅，或机构按席位</span>
+          <span class="k">内容</span><span class="v">AI 生成 + 老师改，机构也能导自有题库</span>
+          <span class="k">合规</span><span class="v"><span class="good">最轻</span> · 不收集未成年人信息</span>
+        </div>
+        <div class="pfoot"><a class="open" href="01-teacher-studio.html">打开原型 →</a><span class="fname">01-teacher-studio.html</span></div>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <div class="stripe" style="background:var(--teal)"></div>
+      <div class="in">
+        <div class="phead"><span class="num" style="background:var(--teal)">02</span><div><p class="ptitle">硬科技闯关营<span class="ptype">成人 / 职教向 · 内容现成</span></p></div><span class="rec">最贴合你本人</span></div>
+        <p class="oneline">NPU、PCIe、RDMA、Triton、运行时层 —— <b>现有学习记录直接当课程包</b>，实机贴回输出自动判定，再生成面试话术。</p>
+        <div class="kv">
+          <span class="k">客户</span><span class="v">转行硬科技的人 / 应届生 / 企业内训</span>
+          <span class="k">谁付钱</span><span class="v">个人买断，或企业打包</span>
+          <span class="k">内容</span><span class="v"><span class="good">已经写好了</span>，不用从零生产</span>
+          <span class="k">合规</span><span class="v"><span class="good">很轻</span> · 无双减 / 无监护人同意；备案边界待核实</span>
+        </div>
+        <div class="pfoot"><a class="open" href="02-adult-camp.html">打开原型 →</a><span class="fname">02-adult-camp.html</span></div>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <div class="stripe" style="background:var(--purple)"></div>
+      <div class="in">
+        <div class="phead"><span class="num" style="background:var(--purple)">03</span><div><p class="ptitle">小胖鱼陪练<span class="ptype">家庭版 AI 学伴 · C 端订阅</span></p></div><span class="rec gray">最重，慎选</span></div>
+        <p class="oneline">你最初想的那套全在这：胖鱼跳舞、攒星星、换装商店、连续打卡。家长中心管时长、同意和数据。</p>
+        <div class="kv">
+          <span class="k">客户</span><span class="v">家长付钱，孩子用</span>
+          <span class="k">谁付钱</span><span class="v">家长订阅</span>
+          <span class="k">内容</span><span class="v"><span class="bad">需持续供给</span>，长期最大成本</span>
+          <span class="k">合规</span><span class="v"><span class="bad">最重</span> · 监护人同意 / 时长锁 / 备案 / 获客</span>
+        </div>
+        <div class="pfoot"><a class="open" href="03-family-app.html">打开原型 →</a><span class="fname">03-family-app.html</span></div>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <div class="stripe" style="background:var(--green)"></div>
+      <div class="in">
+        <div class="phead"><span class="num" style="background:var(--green)">04</span><div><p class="ptitle">闯关教练 · 机构版<span class="ptype">三端全套 · 首轮已完成</span></p></div><span class="rec gray">红海，谨慎</span></div>
+        <p class="oneline">学生端闯关 + 机构端掌握度 / 薄弱点 + 一键家长报告。校长要的招生、续费、减负都在，也是你最开始说的那个。</p>
+        <div class="kv">
+          <span class="k">客户</span><span class="v">课外机构 / 兴趣班（校方采购）</span>
+          <span class="k">谁付钱</span><span class="v">机构年费或按学员数</span>
+          <span class="k">内容</span><span class="v"><span class="mid">要从零做</span> K12 素养课程包</span>
+          <span class="k">合规</span><span class="v"><span class="mid">中重</span> · 备案 / 等保 / 学情数据 / 无排名</span>
+        </div>
+        <div class="pfoot"><a class="open" href="prototype.html">打开原型 →</a><span class="fname">prototype.html</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="matrix">
+    <h2 class="sec">一张表看清差别</h2>
+    <p class="sec-sub">「冷启动」= 从今天到能拿给第一个付费客户看，中间还要干多少活。</p>
+    <table>
+      <thead><tr><th>方向</th><th>客户 / 付款人</th><th>内容从哪来</th><th>合规压力</th><th>冷启动</th><th>最大风险</th></tr></thead>
+      <tbody>
+        <tr><td>01 备课教练</td><td>老师 / 老师本人</td><td class="good">AI 生成 + 老师改</td><td class="good">最轻（无学生数据）</td><td class="good">最短：一个工具页就能试</td><td>客单价低，要铺量</td></tr>
+        <tr><td>02 硬科技闯关营</td><td>成人学习者 / 个人、企业</td><td class="good">现有记录直接用</td><td class="good">很轻（成年人）</td><td class="good">最短：内容已存在</td><td>受众窄，天花板有限</td></tr>
+        <tr><td>03 小胖鱼陪练</td><td>孩子 / 家长订阅</td><td class="bad">要长期持续生产</td><td class="bad">最重（未成年人全链条）</td><td class="bad">最长：内容 + 合规 + 获客</td><td>C 端获客成本、内容无底洞</td></tr>
+        <tr><td>04 机构版</td><td>机构 / 校方采购</td><td class="mid">要做 K12 课程包</td><td class="mid">中重（备案 / 学情数据）</td><td class="mid">长：采购周期 + 三端</td><td>松鼠 AI / 校宝等已占位</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="advice">
+    <div class="box">
+      <h3>我的建议：先 01 或 02，别从 03 / 04 起步</h3>
+      <p>上一轮查到的两条硬事实决定了这个排序：<b>双减</b>把学科类场景压得很死，<b>未成年人信息</b>又让"每道题全量记录 + 学情画像"从优势变成负债。01 直接不碰学生，02 直接不碰未成年人，两边都绕开了最贵的那部分。</p>
+      <p>再加一条现实的：02 的内容你已经写好了，01 的内容由 AI 起草、老师自己改。<b>只有这两款不需要先养一个内容团队。</b></p>
+      <ol>
+        <li>先挑一款，拿原型找 3~5 个真人聊（老师 / 转行同事都行）</li>
+        <li>有人愿意试用或预付，再决定做完整产品</li>
+        <li>03 的游戏化那套留着，等有稳定内容供给再挂上去</li>
+      </ol>
+    </div>
+    <div class="box">
+      <h3>好消息：四款共用一套引擎</h3>
+      <p>不是四个项目。底下这一条链四款完全一样，换的只是<b>谁来用、内容包是什么、结算给谁看</b>：</p>
+      <div class="engine">
+        <span>定靶</span><i>→</i><span>关卡地图</span><i>→</i><span>一次一题</span><i>→</i><span>答前自评</span><i>→</i><span>判卷讲解</span><i>→</i><span>薄弱点 / 复习</span><i>→</i><span>归档</span>
+      </div>
+      <p style="margin-top:14px">所以先做哪一款都不会白做：引擎、题型模板、判卷和数据结构都能复用。真正的分叉只有两个 —— <b>内容包</b>和<b>合规模块</b>（家长同意、时长锁、无排名）。</p>
+      <p>另外，<b style="color:var(--amber)">没动 skill 仓库</b>。那仍是公开的技能逻辑仓库，产品原型单独放，别混在一起。</p>
+    </div>
+  </div>
+</main>
+
+<footer><div class="wrap">
+  <div class="fine">
+    所有文件位于 <b>D:\文档\学习教练APP\</b>，均为单文件静态 HTML，双击即可打开，无后端、无真实账户、无支付、无学生数据。<br>
+    政策口径核于 2026-11-05：双减 2026 年各地通告、教育部等五部门《"人工智能+教育"行动计划》（2026-04，教育部官网）、教技厅〔2019〕3号《教育移动互联网应用程序备案管理办法》、《个人信息保护法》《未成年人网络保护条例》与 2026 年三部门个人信息保护专项行动公告。竞品信息来自 2026 年公开报道。部分标准编号与「进校应用是否免费」仅见二手来源，未作为结论。
+  </div>
+</div></footer>
+</body>
+</html>

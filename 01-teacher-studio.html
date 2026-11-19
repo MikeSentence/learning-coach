@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>备课教练 · 教师出题工作台</title>
+<style>
+  :root{
+    --bg:#F5F8FB;--card:#fff;--line:#E1E8F0;--soft:#EEF3F8;
+    --ink:#1B2733;--ink2:#57687A;--ink3:#8A9AAB;
+    --brand:#185FA5;--brand-soft:#E6F1FB;--brand-ink:#0C447C;
+    --amber:#BA7517;--amber-soft:#FAEEDA;
+    --ok:#0F6E56;--ok-soft:#E1F5EE;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.65 var(--font)}
+  button,input,select,textarea{font-family:inherit;font-size:inherit}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+  header{background:var(--card);border-bottom:1px solid var(--line)}
+  .head{max-width:1160px;margin:0 auto;padding:17px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .mark{width:34px;height:34px;border-radius:10px;background:var(--brand-soft);display:grid;place-items:center;font-weight:700;color:var(--brand);font-size:15px}
+  .brand b{font-size:16px;font-weight:600}
+  .brand span{display:block;font-size:12px;color:var(--ink3);margin-top:-2px}
+  .head .right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .tag{font-size:11px;padding:5px 11px;border-radius:20px;background:var(--ok-soft);color:var(--ok);border:1px solid #BFE7D8}
+  .tag.gray{background:var(--bg);color:var(--ink3);border-color:var(--line)}
+  a.back{font-size:12px;color:var(--brand);text-decoration:none}
+  main{padding:24px 0 44px}
+  .intro{margin:0 0 18px;color:var(--ink2);font-size:13px}
+  .intro b{color:var(--ink)}
+  .grid{display:grid;grid-template-columns:310px 1fr;gap:18px;align-items:start}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card h2{font-size:14px;font-weight:600;margin:0 0 3px}
+  .card .sub{font-size:12px;color:var(--ink3);margin:0 0 18px}
+  label.f{display:block;font-size:12px;color:var(--ink2);margin:14px 0 6px;font-weight:500}
+  input[type=text],select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);outline:none}
+  input[type=text]:focus,select:focus,textarea:focus{border-color:var(--brand)}
+  .checks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .checks label{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);background:var(--bg);border:1px solid var(--line);padding:8px 10px;border-radius:8px;cursor:pointer}
+  .checks input{accent-color:var(--brand)}
+  .dist{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+  .dist div{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px;text-align:center}
+  .dist b{display:block;font-size:17px;color:var(--brand-ink);font-variant-numeric:tabular-nums}
+  .dist span{font-size:11px;color:var(--ink3)}
+  .btn{border:1px solid var(--brand);background:var(--brand);color:#fff;padding:9px 18px;border-radius:9px;font-weight:600;font-size:13px;width:100%;margin-top:18px}
+  .btn:hover{background:var(--brand-ink)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.ghost{background:#fff;color:var(--brand);border-color:var(--line)}
+  .btn.sm{width:auto;padding:7px 13px;font-size:12px;margin:0}
+  .note{font-size:11px;color:var(--ink3);line-height:1.7;margin-top:14px;padding-top:14px;border-top:1px solid var(--soft)}
+
+  .empty{padding:56px 24px;text-align:center;color:var(--ink3);font-size:13px}
+  .empty .big{font-size:15px;color:var(--ink2);margin-bottom:8px;font-weight:500}
+  #workspace{display:none}
+  .map{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px}
+  .map th{text-align:left;color:var(--ink3);font-weight:500;padding:7px 9px;border-bottom:1px solid var(--line);font-size:11px}
+  .map td{padding:9px;border-bottom:1px solid var(--soft);color:var(--ink2)}
+  .map td:first-child{font-weight:600;color:var(--brand-ink);white-space:nowrap}
+  .stars{color:var(--amber);letter-spacing:1px;white-space:nowrap}
+  .q{border:1px solid var(--line);border-radius:11px;padding:15px;margin-bottom:11px}
+  .q.done{border-color:#BFE7D8;background:#FBFEFC}
+  .q-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .chip{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--bg);border:1px solid var(--line);color:var(--ink2)}
+  .chip.b{background:var(--brand-soft);border-color:#CFE4F8;color:var(--brand-ink)}
+  .chip.a{background:var(--amber-soft);border-color:#F0D9AE;color:var(--amber)}
+  .q textarea{resize:vertical;min-height:58px;line-height:1.7}
+  .opt-line{font-size:12px;color:var(--ink2);margin:7px 0 0;padding-left:4px}
+  .opt-line b{color:var(--brand-ink)}
+  .q-foot{display:flex;align-items:center;gap:10px;margin-top:11px;flex-wrap:wrap}
+  .check-btn{border:1px solid var(--line);background:#fff;color:var(--ink2);padding:6px 12px;border-radius:8px;font-size:12px}
+  .check-btn.on{background:var(--ok-soft);border-color:#BFE7D8;color:var(--ok);font-weight:600}
+  .progress-box{display:flex;align-items:center;gap:12px;margin-top:16px;padding:13px 15px;background:var(--bg);border-radius:10px;flex-wrap:wrap}
+  .progress-box .txt{font-size:12px;color:var(--ink2)}
+  .progress-box .bar{flex:1;min-width:120px;height:7px;background:var(--line);border-radius:6px;overflow:hidden}
+  .progress-box .bar i{display:block;height:100%;background:var(--brand);width:0;transition:width .35s}
+  .handout{display:none;margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:26px 30px}
+  .handout h3{font-size:17px;margin:0 0 4px}
+  .handout .meta{font-size:11px;color:var(--ink3);margin-bottom:18px;padding-bottom:12px;border-bottom:2px solid var(--brand)}
+  .handout .item{font-size:13px;line-height:1.9;margin-bottom:14px}
+  .handout .item b{color:var(--brand-ink)}
+  .toast{display:inline-block;font-size:12px;color:var(--ok);background:var(--ok-soft);padding:6px 12px;border-radius:8px;opacity:0;transition:.25s}
+  .toast.on{opacity:1}
+  footer{border-top:1px solid var(--line);background:var(--card);padding:16px 0 26px}
+  .comp{display:flex;gap:8px;flex-wrap:wrap}
+  .comp span{font-size:11px;color:var(--ink2);background:var(--bg);border:1px solid var(--line);padding:5px 10px;border-radius:20px}
+  .comp span.g{color:var(--ok);background:var(--ok-soft);border-color:#BFE7D8}
+  .comp .lead{font-size:11px;color:var(--ink3);background:none;border:0;padding:5px 4px}
+  .fine{font-size:11px;color:var(--ink3);margin-top:10px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  @media print{header,footer,.intro,.config,.progress-box,.no-print{display:none!important}.handout{display:block!important;border:0}main{padding:0}.grid{display:block}}
+</style>
+</head>
+<body>
+<header><div class="head">
+  <div class="mark">备</div>
+  <div class="brand"><b>备课教练</b><span>老师用的出题工作台 · 不碰学生数据</span></div>
+  <div class="right">
+    <span class="tag">系统里没有学生</span>
+    <span class="tag gray">演示数据</span>
+    <a class="back" href="index.html">← 全部产品</a>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <p class="intro"><b>方向 01 · 只卖老师，不卖机构。</b> 输入一个知识点，AI 起草关卡和分层题目，老师逐题复核后导出讲义。学生不注册、不答题、不留数据 —— 未成年人信息合规这一整块基本绕开了，老师个人就能付费。</p>
+
+  <div class="grid">
+    <div class="card config">
+      <h2>出一份关卡讲义</h2>
+      <p class="sub">先定主题和难度分布</p>
+
+      <label class="f" for="topic">知识点 / 主题</label>
+      <input type="text" id="topic" list="topics" value="机器人怎么判断前方有障碍">
+      <datalist id="topics">
+        <option value="机器人怎么判断前方有障碍">
+        <option value="齿轮为什么能省力">
+        <option value="图像识别为什么会把猫认成狗">
+        <option value="桥为什么能承重">
+      </datalist>
+
+      <label class="f" for="grade">学段</label>
+      <select id="grade">
+        <option>小学低年级（1-2 年级）</option>
+        <option selected>小学高年级（3-6 年级）</option>
+        <option>初中</option>
+      </select>
+
+      <label class="f" for="levels">关卡数</label>
+      <select id="levels"><option>4 关</option><option selected>5 关</option><option>6 关</option></select>
+
+      <label class="f">题型（可多选）</label>
+      <div class="checks" id="checks">
+        <label><input type="checkbox" checked> 判断题</label>
+        <label><input type="checkbox" checked> 选择题</label>
+        <label><input type="checkbox" checked> 场景题</label>
+        <label><input type="checkbox"> 动手题</label>
+      </div>
+
+      <label class="f">难度分布</label>
+      <div class="dist">
+        <div><b id="d1">3</b><span>1-2 星 基础</span></div>
+        <div><b id="d2">2</b><span>3 星 进阶</span></div>
+        <div><b id="d3">1</b><span>4-5 星 挑战</span></div>
+      </div>
+
+      <button class="btn" id="genBtn">生成关卡与题目（AI 起草）</button>
+      <div class="note">
+        生成的是<strong>草稿</strong>：题干、选项、正确答案都能直接改。<br><br>
+        每一题必须老师点「复核通过」，才能导出讲义 —— 这一步既是教学质量把关，也是 AI 生成内容合规要求。
+      </div>
+    </div>
+
+    <div>
+      <div class="card" id="empty">
+        <div class="empty">
+          <div class="big">左边填好主题，点「生成」</div>
+          会先出关卡地图，再出可编辑的分层题目。<br>这里不出现任何学生姓名、成绩或排名。
+        </div>
+      </div>
+
+      <div class="card" id="workspace">
+        <h2 id="wsTitle">关卡地图</h2>
+        <p class="sub" id="wsSub"></p>
+        <table class="map" id="mapTable"></table>
+
+        <h2>待复核题目</h2>
+        <p class="sub">点题干可以直接改；复核通过后才计入导出</p>
+        <div id="qList"></div>
+
+        <div class="progress-box">
+          <span class="txt" id="reviewTxt">已复核 0 / 3</span>
+          <span class="bar"><i id="reviewBar"></i></span>
+          <button class="btn sm" id="exportBtn" disabled>导出讲义</button>
+          <span class="toast" id="toast">讲义已生成，可打印</span>
+        </div>
+
+        <div class="handout" id="handout">
+          <h3 id="hTitle">课堂闯关讲义</h3>
+          <div class="meta" id="hMeta"></div>
+          <div id="hItems"></div>
+          <div class="no-print" style="margin-top:20px;display:flex;gap:9px">
+            <button class="btn sm ghost" onclick="window.print()">打印 / 存 PDF</button>
+            <button class="btn sm ghost" id="copyBtn">复制文字版</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer><div class="wrap">
+  <div class="comp">
+    <span class="lead">为什么这条路合规最轻</span>
+    <span class="g">不收集学生个人信息</span>
+    <span class="g">不需要家长同意流程</span>
+    <span class="g">不涉及成绩排名</span>
+    <span>AI 内容由教师复核后使用</span>
+    <span>教育机构采购可后置</span>
+  </div>
+  <div class="fine">原型说明：单文件静态演示，生成逻辑为本地模板，无后端、无真实 AI 调用、无学生数据。若做成产品，需接入出题模型并保留复核留痕。</div>
+</div></footer>
+
+<script>
+(function(){
+  'use strict';
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+  var bank=[
+    {
+      key:'机器人怎么判断前方有障碍',
+      map:[
+        ['L1','说清传感器在干什么','★☆☆☆☆','判断题'],
+        ['L2','区分超声波和红外','★★☆☆☆','选择题'],
+        ['L3','说出距离是怎么算出来的','★★★☆☆','场景题'],
+        ['L4','判断误触发该往哪查','★★★★☆','场景题'],
+        ['L5','自己设计一个避障方案','★★★★★','动手题']
+      ],
+      qs:[
+        {stars:2,type:'判断题',text:'机器人「看到」障碍，靠的是传感器把外界的物理量变成电信号。对还是错？',opts:['A. 对','B. 错'],ans:'A',why:'传感器本质就是物理量→电信号的转换，这一关只要求说清这件事，不涉及具体公式。'},
+        {stars:3,type:'选择题',text:'超声波模块测距时，实际被测量的是下面哪个量？',opts:['A. 声音的响度','B. 从发出到收到回波的时间','C. 障碍物的颜色','D. 电池电压'],ans:'B',why:'距离 = 声速 × 时间 ÷ 2，除以 2 是因为声波走了一个来回。容易错选 A，因为「声音大不大」听起来很像测距。'},
+        {stars:4,type:'场景题',text:'机器人在空旷教室里偶尔急停，但面前什么都没有。下面最该先查的是？',opts:['A. 把电机换成更大功率的','B. 检查是否存在斜面或软材料把声波反射走了','C. 把程序里的时间参数调大十倍','D. 换一门编程语言'],ans:'B',why:'这是真实课堂里最常见的一类故障：不是算法错了，是物理条件让回波没回来。先查环境和安装，再改参数。'}
+      ]
+    },
+    {
+      key:'图像识别为什么会把猫认成狗',
+      map:[
+        ['L1','说清「识别」在做什么','★☆☆☆☆','判断题'],
+        ['L2','区分特征与整张图','★★☆☆☆','选择题'],
+        ['L3','说清视角变化的影响','★★★☆☆','场景题'],
+        ['L4','判断该补数据还是换模型','★★★★☆','场景题'],
+        ['L5','设计一个验证办法','★★★★★','动手题']
+      ],
+      qs:[
+        {stars:2,type:'判断题',text:'模型把猫认对了，就等于它理解了「猫」这个概念。对还是错？',opts:['A. 对','B. 错'],ans:'B',why:'输出正确只说明这次映射对了，模型没有关于猫的常识和经验。这一关要把「答对」和「理解」分开。'},
+        {stars:3,type:'选择题',text:'模型学的主要是什么？',opts:['A. 一整张猫的照片','B. 边缘、纹理、形状等特征的组合','C. 猫的汉字写法','D. 摄像头的型号'],ans:'B',why:'学到的是特征组合，不是把图片背下来。这也解释了为什么换个没见过的姿态就可能认错。'},
+        {stars:4,type:'场景题',text:'换个角度拍同一只猫，模型忽然认成狗了。最贴近真实原因的是？',opts:['A. 摄像头像素不够','B. 角度一变，特征组合也变了','C. 机器人没联网','D. 猫动了'],ans:'B',why:'训练时覆盖多角度（数据增强）就是为了缓解这件事。学生第一反应通常怪硬件，正好用来讲「先找数据还是先找设备」。'}
+      ]
+    }
+  ];
+
+  var state={qs:[],reviewed:[],topic:'',grade:''};
+
+  function pickBank(topic){
+    for(var i=0;i<bank.length;i++){if(topic.indexOf(bank[i].key.slice(0,4))>=0) return bank[i];}
+    return /猫|图像|识别|认成/.test(topic)?bank[1]:bank[0];
+  }
+
+  function generate(){
+    var topic=$('topic').value.trim()||'机器人怎么判断前方有障碍';
+    var grade=$('grade').value;
+    var b=pickBank(topic);
+    state.topic=topic; state.grade=grade;
+    state.qs=b.qs.map(function(q){return {stars:q.stars,type:q.type,text:q.text,opts:q.opts.slice(),ans:q.ans,why:q.why};});
+    state.reviewed=state.qs.map(function(){return false;});
+
+    $('empty').style.display='none';
+    $('workspace').style.display='block';
+    $('wsTitle').textContent='关卡地图 · '+topic;
+    $('wsSub').textContent=grade+' ｜ '+$('levels').value+' ｜ 基础 3 题 / 进阶 2 题 / 挑战 1 题';
+    $('mapTable').innerHTML='<tr><th>关卡</th><th>学完能做什么</th><th>难度</th><th>主要形式</th></tr>'+
+      b.map.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td class="stars">'+r[2]+'</td><td>'+r[3]+'</td></tr>';}).join('');
+
+    $('qList').innerHTML=state.qs.map(function(q,i){
+      return '<div class="q" id="q'+i+'">'+
+        '<div class="q-head"><span class="chip b">第 '+(i+1)+' 题</span><span class="chip a stars">'+'★'.repeat(q.stars)+'☆'.repeat(5-q.stars)+' '+q.stars+' 星</span><span class="chip">'+q.type+'</span></div>'+
+        '<textarea data-q="'+i+'" aria-label="题干">'+esc(q.text)+'</textarea>'+
+        q.opts.map(function(o){return '<div class="opt-line">'+esc(o)+'</div>';}).join('')+
+        '<div class="opt-line"><b>正确答案 '+q.ans+'</b> ｜ '+esc(q.why)+'</div>'+
+        '<div class="q-foot"><button class="check-btn" data-check="'+i+'">复核通过</button><span style="font-size:11px;color:var(--ink3)">AI 起草 · 需老师确认</span></div>'+
+      '</div>';
+    }).join('');
+
+    $('handout').style.display='none';
+    updateProgress();
+  }
+
+  function updateProgress(){
+    var n=state.reviewed.filter(Boolean).length;
+    $('reviewTxt').textContent='已复核 '+n+' / '+state.reviewed.length;
+    $('reviewBar').style.width=(n/state.reviewed.length*100)+'%';
+    $('exportBtn').disabled=n<state.reviewed.length;
+  }
+
+  function exportHandout(){
+    var items=state.qs.map(function(q,i){
+      return '<div class="item"><b>第 '+(i+1)+' 题 · '+q.stars+' 星 · '+q.type+'</b><br>'+esc(q.text)+'<br>'+
+        q.opts.map(function(o){return esc(o);}).join('　')+'<br>'+
+        '<span style="color:var(--ink3);font-size:12px">参考答案 '+q.ans+' ｜ '+esc(q.why)+'</span></div>';
+    }).join('');
+    $('hTitle').textContent='课堂闯关讲义 · '+state.topic;
+    $('hMeta').textContent=state.grade+' ｜ 共 '+state.qs.length+' 题 ｜ 已由任课教师逐题复核 ｜ 生成日期 2026-11-05';
+    $('hItems').innerHTML=items;
+    $('handout').style.display='block';
+    var t=$('toast');t.classList.add('on');setTimeout(function(){t.classList.remove('on');},2400);
+    $('handout').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  $('genBtn').addEventListener('click',generate);
+  $('qList').addEventListener('input',function(e){
+    var t=e.target;
+    if(t.tagName==='TEXTAREA'){state.qs[parseInt(t.getAttribute('data-q'),10)].text=t.value;}
+  });
+  $('qList').addEventListener('click',function(e){
+    var b=e.target.closest('[data-check]');if(!b)return;
+    var i=parseInt(b.getAttribute('data-check'),10);
+    state.reviewed[i]=!state.reviewed[i];
+    b.classList.toggle('on',state.reviewed[i]);
+    b.textContent=state.reviewed[i]?'✓ 已复核':'复核通过';
+    $('q'+i).classList.toggle('done',state.reviewed[i]);
+    updateProgress();
+  });
+  $('exportBtn').addEventListener('click',exportHandout);
+  $('copyBtn').addEventListener('click',function(){
+    var txt='课堂闯关讲义 · '+state.topic+'\n'+state.grade+'\n\n'+state.qs.map(function(q,i){
+      return '第 '+(i+1)+' 题（'+q.stars+' 星 · '+q.type+'）\n'+q.text+'\n'+q.opts.join('　')+'\n参考答案：'+q.ans+'\n';
+    }).join('\n');
+    if(navigator.clipboard){navigator.clipboard.writeText(txt);}
+    var t=$('toast');t.textContent='文字版已复制';t.classList.add('on');
+    setTimeout(function(){t.classList.remove('on');t.textContent='讲义已生成，可打印';},2200);
+  });
+})();
+</script>
+</body>
+</html>

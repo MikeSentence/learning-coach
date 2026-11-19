@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>闯关学习台 · 任何主题，任何人</title>
+<style>
+:root{
+  --bg:#F6F8F9; --card:#FFFFFF; --line:#E3E8EA; --line-soft:#EEF2F3;
+  --ink:#1F272B; --ink-2:#5A676C; --ink-3:#8A989D;
+  --brand:#0F6E56; --brand-soft:#E1F5EE; --brand-ink:#0A4C3C;
+  --blue:#185FA5; --blue-soft:#E6F1FB; --amber:#BA7517; --amber-soft:#FAEEDA;
+  --red:#A32D2D; --red-soft:#FCEBEB; --purple:#6C5FC0; --purple-soft:#EFEDFA;
+  --radius:14px; --shadow:0 1px 2px rgba(20,40,45,.04),0 8px 24px rgba(20,40,45,.05);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+}
+body[data-theme="dark"]{
+  --bg:#141A1C; --card:#1C2427; --line:#2C373B; --line-soft:#242E32;
+  --ink:#E6EDEF; --ink-2:#A6B5BA; --ink-3:#7C8C92;
+  --brand:#4CC2A0; --brand-soft:#1B3B33; --brand-ink:#8BE0C6;
+  --blue:#68A9EA; --blue-soft:#1C3047; --amber:#E0A950; --amber-soft:#3B2E17;
+  --red:#E57C7C; --red-soft:#3B2020; --purple:#A79BEE; --purple-soft:#2C2745;
+  --shadow:0 1px 2px rgba(0,0,0,.2),0 8px 24px rgba(0,0,0,.18);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--blue);text-decoration:none}
+
+/* ---------- 顶栏 ---------- */
+.topbar{position:sticky;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line);}
+.topbar-in{max-width:1500px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;white-space:nowrap}
+.logo .mark{width:26px;height:26px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:14px;font-weight:800}
+.topic-chip{background:var(--brand-soft);color:var(--brand-ink);border-radius:999px;padding:3px 12px;font-size:12px;font-weight:600;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.progress-line{flex:1;min-width:280px;background:var(--line-soft);border:1px solid var(--line);border-radius:10px;padding:6px 12px;font-size:12.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.progress-line b{color:var(--ink)}
+.top-actions{display:flex;gap:6px;align-items:center}
+.icon-btn{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:6px 10px;font-size:12.5px;color:var(--ink-2);transition:.15s}
+.icon-btn:hover{border-color:var(--brand);color:var(--brand)}
+
+/* ---------- 布局 ---------- */
+.layout{max-width:1500px;margin:0 auto;padding:20px;display:grid;grid-template-columns:250px minmax(0,1fr) 288px;gap:18px;align-items:start}
+@media(max-width:1180px){.layout{grid-template-columns:230px minmax(0,1fr)}.rightcol{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.rightcol>.card{margin:0}}
+@media(max-width:760px){.layout{grid-template-columns:1fr;padding:12px}.rightcol{grid-template-columns:1fr}.progress-line{order:3;min-width:100%}.card{padding:16px}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:14px}
+.card h3{margin:0 0 12px;font-size:13px;letter-spacing:.03em;color:var(--ink-2);font-weight:700;display:flex;align-items:center;gap:7px}
+.card h3 .dot{width:6px;height:6px;border-radius:50%;background:var(--brand)}
+.muted{color:var(--ink-3);font-size:12px}
+.divider{height:1px;background:var(--line-soft);margin:14px 0}
+
+/* ---------- 控件 ---------- */
+label.field{display:block;margin-bottom:14px}
+label.field>span{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+input[type=text],input[type=password],select,textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:9px 11px;outline:none;transition:.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+textarea{resize:vertical;min-height:88px;line-height:1.6}
+.btn{border:1px solid transparent;border-radius:9px;padding:9px 15px;font-weight:600;font-size:13px;transition:.15s;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn.primary{background:var(--brand);color:#fff}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.ghost{background:var(--card);border-color:var(--line);color:var(--ink-2)}
+.btn.ghost:hover{border-color:var(--brand);color:var(--brand)}
+.btn.soft{background:var(--brand-soft);color:var(--brand-ink)}
+.btn.sm{padding:5px 10px;font-size:12px;border-radius:8px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{flex:1;border:0;background:var(--card);padding:9px 10px;font-size:12.5px;color:var(--ink-2);border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--brand-soft);color:var(--brand-ink);font-weight:700}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;background:var(--line-soft);color:var(--ink-2)}
+.pill.ok{background:var(--brand-soft);color:var(--brand-ink)}
+.pill.warn{background:var(--amber-soft);color:var(--amber)}
+.pill.bad{background:var(--red-soft);color:var(--red)}
+.pill.info{background:var(--blue-soft);color:var(--blue)}
+
+/* ---------- 关卡地图 ---------- */
+.map-svg{width:100%;display:block}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--ink-3);margin-top:8px}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.route-table{width:100%;border-collapse:collapse;font-size:13px}
+.route-table th{text-align:left;font-size:11.5px;color:var(--ink-3);font-weight:600;padding:7px 8px;border-bottom:1px solid var(--line)}
+.route-table td{padding:10px 8px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+.route-table tr:last-child td{border-bottom:0}
+.lvl-tag{font-weight:800;color:var(--brand);font-size:12px;white-space:nowrap}
+
+/* ---------- 主舞台 ---------- */
+.hero{padding:26px 26px 22px}
+.hero h1{margin:0 0 8px;font-size:24px;letter-spacing:-.02em}
+.hero p{margin:0 0 18px;color:var(--ink-2);max-width:660px}
+.hero .kicker{font-size:12px;font-weight:700;color:var(--brand);letter-spacing:.08em;margin-bottom:8px}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+@media(max-width:760px){.feature-grid{grid-template-columns:1fr}}
+.feature{background:var(--bg);border:1px solid var(--line-soft);border-radius:10px;padding:11px 13px}
+.feature b{display:block;font-size:12.5px;margin-bottom:3px}
+.feature span{font-size:11.5px;color:var(--ink-3);line-height:1.5}
+
+.stage-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.stage-head h2{margin:0;font-size:18px}
+.step-flow{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.step{font-size:11.5px;padding:4px 11px;border-radius:999px;background:var(--line-soft);color:var(--ink-3);font-weight:600}
+.step.on{background:var(--brand);color:#fff}
+.step.done{background:var(--brand-soft);color:var(--brand-ink)}
+.step-arrow{color:var(--ink-3);font-size:11px}
+
+.block{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:12px;background:var(--card)}
+.block .tag{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--brand);margin-bottom:8px}
+.block.brief{background:var(--brand-soft);border-color:transparent}
+.block.brief .tag{color:var(--brand-ink)}
+.block.visual{background:var(--blue-soft);border-color:transparent}
+.block.visual .tag{color:var(--blue)}
+.block.quiz{border:1.5px solid var(--brand);padding:18px}
+.block.verdict{border-left:4px solid var(--brand)}
+.block.verdict.wrong{border-left-color:var(--red);background:var(--red-soft)}
+.block.verdict.right{background:var(--brand-soft)}
+.q-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.q-stem{font-size:15px;font-weight:600;line-height:1.7;margin:0 0 14px;white-space:pre-wrap}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:760px){.options{grid-template-columns:1fr}}
+.option{text-align:left;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 13px;transition:.15s;line-height:1.5}
+.option:hover{border-color:var(--brand);background:var(--brand-soft)}
+.option.sel{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-ink);font-weight:600}
+.option.correct{background:var(--brand-soft);border-color:var(--brand);font-weight:700}
+.option.incorrect{background:var(--red-soft);border-color:var(--red)}
+.answer-box{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;white-space:pre-wrap;font-size:13.5px;line-height:1.7}
+.rubric{margin:8px 0 0;padding-left:20px;color:var(--ink-2);font-size:13px}
+.glossary-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.glossary-table th{text-align:left;color:var(--ink-3);font-size:11px;padding:5px 8px;border-bottom:1px solid var(--line)}
+.glossary-table td{padding:7px 8px;border-bottom:1px solid var(--line-soft)}
+.glossary-table code{background:var(--purple-soft);color:var(--purple);padding:1px 6px;border-radius:5px;font-weight:700}
+
+/* ---------- 图表 ---------- */
+.ring-wrap{display:flex;align-items:center;gap:16px}
+.meter{margin-bottom:10px}
+.meter .lab{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.meter .track{height:7px;border-radius:99px;background:var(--line-soft);overflow:hidden}
+.meter .fill{height:100%;border-radius:99px;background:var(--brand);transition:width .4s}
+.meter .fill.warn{background:var(--amber)}
+.meter .fill.bad{background:var(--red)}
+.spark{width:100%;height:74px;display:block}
+.kv{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px dashed var(--line-soft)}
+.kv:last-child{border-bottom:0}
+.review-item{border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin-bottom:8px;font-size:12.5px;background:var(--bg)}
+.review-item .due{font-size:11px;color:var(--amber);font-weight:700}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:11.5px;color:var(--ink-2);background:var(--card)}
+.chip:hover{border-color:var(--brand);color:var(--brand)}
+.notice{background:var(--amber-soft);color:var(--amber);border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.6}
+.empty{text-align:center;color:var(--ink-3);font-size:12.5px;padding:18px 8px}
+
+/* ---------- 弹窗 / toast ---------- */
+.mask{position:fixed;inset:0;background:rgba(15,25,28,.45);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
+.mask.show{display:flex}
+.modal{background:var(--card);border-radius:16px;padding:22px;width:min(520px,100%);max-height:86vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.2)}
+.modal h2{margin:0 0 4px;font-size:18px}
+.modal .sub{color:var(--ink-3);font-size:12px;margin-bottom:16px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:var(--ink);color:var(--card);padding:10px 18px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:80}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.loading{display:inline-block;width:13px;height:13px;border:2px solid var(--brand-soft);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.footer{max-width:1500px;margin:0 auto;padding:0 20px 30px;color:var(--ink-3);font-size:11.5px;text-align:center;line-height:1.7}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="logo"><span class="mark">关</span>闯关学习台</div>
+    <div class="topic-chip" id="topicChip">未选择主题</div>
+    <div class="progress-line" id="progressLine">📍 进度：还没开局 ｜ 填一个想学的主题就能开始</div>
+    <div class="top-actions">
+      <button class="icon-btn" id="btnSettings">⚙ 教练设置</button>
+      <button class="icon-btn" id="btnTheme">◐ 深浅色</button>
+      <button class="icon-btn" id="btnNew">＋ 新主题</button>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- 左：关卡地图 -->
+  <div class="leftcol">
+    <div class="card">
+      <h3><span class="dot"></span>关卡地图</h3>
+      <div id="mapSvg"></div>
+      <div class="legend">
+        <span><i style="background:var(--brand)"></i>通过</span>
+        <span><i style="background:var(--amber)"></i>进行中</span>
+        <span><i style="background:var(--line)"></i>未开始</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>到期复习 <span class="pill warn" id="reviewCount">0</span></h3>
+      <div id="reviewList"></div>
+      <div class="divider"></div>
+      <div class="muted">答错的考点按 1 → 3 → 7 → 15 → 30 天顺延；讲解后才答对会退回到 1 天。</div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>术语对照表</h3>
+      <div id="glossaryBox"></div>
+    </div>
+  </div>
+
+  <!-- 中：主舞台 -->
+  <div class="maincol" id="maincol"></div>
+
+  <!-- 右：可视化数据 -->
+  <div class="rightcol">
+    <div class="card">
+      <h3><span class="dot"></span>掌握度</h3>
+      <div id="masteryBox"></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>正确率曲线</h3>
+      <svg class="spark" id="spark" viewBox="0 0 260 74" preserveAspectRatio="none"></svg>
+      <div class="muted" id="sparkHint">每道题都记，答对的也记。</div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>节奏指令</h3>
+      <div class="chip-row" id="rhythmRow"></div>
+      <div class="divider"></div>
+      <div class="muted">就是你学的时候会说的那些话，做成了按钮。</div>
+    </div>
+    <div class="card">
+      <h3><span class="dot"></span>学习记录</h3>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn ghost sm" id="btnExportMd">导出 Markdown</button>
+        <button class="btn ghost sm" id="btnExportJson">导出 JSON</button>
+        <button class="btn ghost sm" id="btnImport">导入</button>
+        <button class="btn ghost sm" id="btnReset">清空重来</button>
+      </div>
+      <div class="divider"></div>
+      <div class="muted">数据只存在这台设备的浏览器里，导出文件带进度总览，换设备可以导回去接着学。</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  闯关学习台 · 把「我想学 X」变成一条不用自己设计的学习路线。引擎与内容分离：任何学科都能装进来。<br>
+  教练设置里接上自己的模型就能出题；不接也能用自练模式和示例包完整跑一遍。
+</div>
+
+<!-- 设置弹窗 -->
+<div class="mask" id="maskSettings">
+  <div class="modal">
+    <h2>教练设置</h2>
+    <div class="sub">不填也能用。填了之后，任何主题都能由模型现编关卡和题目。</div>
+    <div class="notice" style="margin-bottom:16px">密钥只保存在你这台设备的浏览器里，不会写进导出的学习记录，也不会发到除你填写的接口地址之外的任何地方。</div>
+    <label class="field"><span>接口地址（OpenAI 兼容，填到 /v1 为止）</span><input type="text" id="cfgBase" placeholder="https://api.openai.com/v1"></label>
+    <label class="field"><span>模型名</span><input type="text" id="cfgModel" placeholder="gpt-4o-mini"></label>
+    <label class="field"><span>API Key</span><input type="password" id="cfgKey" placeholder="sk-..."></label>
+    <label class="field"><span>起点水平</span><select id="cfgLevel"><option value="零基础">零基础 · 什么都别假设我懂</option><option value="有点印象">有点印象 · 听过但说不清</option><option value="想系统过一遍">想系统过一遍</option><option value="备考/面试">备考 / 面试 · 直接上强度</option></select></label>
+    <label class="field"><span>学习目的</span><select id="cfgGoal"><option>搞懂原理</option><option>能上手做</option><option>备考 / 面试</option><option>纯好奇</option></select></label>
+    <div class="btn-row">
+      <button class="btn primary" id="btnSaveCfg">保存</button>
+      <button class="btn ghost" onclick="closeModal('maskSettings')">取消</button>
+      <button class="btn ghost" id="btnTestCfg">测一下连通</button>
+    </div>
+  </div>
+</div>
+
+<!-- 导入弹窗 -->
+<div class="mask" id="maskImport">
+  <div class="modal">
+    <h2>导入学习包 / 学习记录</h2>
+    <div class="sub">粘贴导出的 JSON，或者别人分享给你的关卡包，接着上次的进度学。</div>
+    <textarea id="importText" placeholder='{"type":"state", ...} 或 {"type":"pack", ...}' style="min-height:180px;font-family:ui-monospace,Consolas,monospace;font-size:12px"></textarea>
+    <div class="btn-row">
+      <button class="btn primary" id="btnDoImport">导入</button>
+      <button class="btn ghost" onclick="closeModal('maskImport')">取消</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   闯关学习台 —— 引擎与内容分离
+   - 引擎：关卡地图 / 四拍 / 一次一题 / 六种题型 / 自适应
+           / 进度条 / 术语表 / 每题记录 / 间隔复习 / 双写导出
+   - 内容：主题由用户输入；可由模型生成，或自练骨架，或导入知识包
+   ========================================================= */
+const LS = 'universal-learning-coach-v1';
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today = () => new Date().toISOString().slice(0,10);
+const addDays = (d,n) => { const t = new Date(d+'T00:00:00'); t.setDate(t.getDate()+n); return t.toISOString().slice(0,10); };
+const uid = () => Math.random().toString(36).slice(2,9);
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._timer); t._timer=setTimeout(()=>t.classList.remove('show'),2600); }
+function closeModal(id){ $('#'+id).classList.remove('show'); }
+function openModal(id){ $('#'+id).classList.add('show'); }
+
+/* ---------- 状态 ---------- */
+const blankState = () => ({
+  version:1, topic:'', goal:'搞懂原理', startLevel:'有点印象',
+  engine:'local', view:'setup', levels:[], packs:{}, phase:'brief',
+  cur:0, qIndex:0, selected:null, verdict:null,
+  records:[], weakPoints:[], glossary:[], streak:0, difficulty:1,
+  packsApproved:false, createdAt:today(), settings:{ base:'', model:'', key:'', level:'有点印象', goal:'搞懂原理' }
+});
+let S = load();
+function load(){
+  try{ const raw = localStorage.getItem(LS); if(!raw) return blankState();
+    const d = JSON.parse(raw); return Object.assign(blankState(), d);
+  }catch(e){ return blankState(); }
+}
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){ toast('本地存储写不进去，记得导出备份'); } }
+
+/* ---------- 通用关卡骨架（不编造任何学科事实） ---------- */
+const BLUEPRINT = [
+  { title:'说清它是什么', goal:'能用一句话讲清它是什么、解决什么问题，不靠术语堆', form:'讲解 + 判断题', qtype:'judge' },
+  { title:'分清容易混的', goal:'能把它和最常被搞混的邻居分开，说出分界线在哪', form:'选择题 + 对比表', qtype:'choice' },
+  { title:'拆开底层机制', goal:'能一步一步说出它怎么运作，而不是背结论', form:'填空 + 手撕', qtype:'blank' },
+  { title:'放到真实场景', goal:'遇到真实情况时，能判断该往哪查、该怎么做', form:'场景题', qtype:'scene' },
+  { title:'改条件再推演', goal:'改一个前提，能推演哪里先崩、为什么', form:'反问题', qtype:'reverse' },
+  { title:'被追问三层', goal:'连续被问「为什么」也不掉线，能讲出边界', form:'反问 + 模拟面试', qtype:'reverse' }
+];
+const LOCAL_STEMS = {
+  judge:  t => '先用你自己的话写一句：「'+t+' 到底是什么，它解决的是什么问题」。\n\n然后判一下：你现在这句话里，有没有哪个词是你其实解释不清的？把那个词圈出来。',
+  choice: t => '在 '+t+' 里，找出一组最容易被混为一谈的概念（或两种常见做法）。\n\n写下：它们分别是什么、分界线在哪、什么情况下会选错。',
+  blank:  t => '把 '+t+' 的运作过程按顺序列成 3-5 步，每一步只写一句。\n\n标出其中你最说不清的那一步 —— 那才是你这关真正要补的地方。',
+  scene:  t => '假设你在一个真实场景里要用 '+t+'，结果表现和你预期的不一样。\n\n写下：你会按什么顺序排查？每一步想看到什么、看到什么就排除哪种可能？',
+  reverse:t => '把 '+t+' 的某个关键条件改掉（规模放大十倍 / 换一类对象 / 拿掉一个前提）。\n\n推演：哪一步最先出问题？为什么是它先，而不是别的？',
+  code:   t => '把 '+t+' 里最核心的那一段，自己动手写/推一遍（代码、公式、步骤都行），不许看资料。\n\n卡住的地方原样记下来。'
+};
+function buildLocalPack(topic, levelIdx){
+  const b = BLUEPRINT[levelIdx];
+  return {
+    levelId:'L'+(levelIdx+1),
+    brief:'这一关不给你结论。'+b.goal+'。\n下面这题是给「'+topic+'」用的自检题 —— 自练模式不替你编事实，答案由你自己写，写完自己判「讲清了 / 半懂 / 不会」。',
+    visual:{ kind:'steps', title:'这一关要跑完的四步', nodes:['铺垫：先给直觉','展示：让概念可见','检验：一次只答一题','结算：一句话 + 薄弱点'] },
+    glossary:[],
+    questions:[{ type:b.qtype, stem:LOCAL_STEMS[b.qtype](topic), options:null, answer:'', rubric:['有没有说出「是什么」而不只是复述名词','有没有指出自己最说不清的那一步','推理链条能不能自洽'], explain:'开放题没有唯一答案。对照左边三条要点自己判：说全了就过，卡住的地方直接记成薄弱点，下次先复习它。', point:b.title }],
+    summary:'这一关的重点不是答对，是找出你自己讲不清的那一处。',
+    practice:''
+  };
+}
+
+/* ---------- 示例包：一个中性主题，用来看清整套交互 ---------- */
+const DEMO_TOPIC = '为什么天空是蓝色的';
+const DEMO_LEVELS = [
+  {id:'L1', title:'说清现象', goal:'能一句话说清看到的是什么、和什么有关', form:'讲解 + 判断题'},
+  {id:'L2', title:'分清容易混的', goal:'能区分「散射」和「反射/折射」', form:'选择题 + 对比表'},
+  {id:'L3', title:'拆开机制', goal:'能说出波长和散射强度的关系，以及为什么不是紫色', form:'填空 + 手撕'},
+  {id:'L4', title:'放到真实场景', goal:'能解释朝霞晚霞为什么偏红', form:'场景题'},
+  {id:'L5', title:'改条件推演', goal:'换一个大气条件，能推演颜色会怎么变', form:'反问题'}
+];
+const DEMO_PACKS = {
+ L1:{ levelId:'L1', brief:'先给个直觉：你看到的蓝天，不是天本身有颜色，是太阳光在空气里被「筛」了一遍之后剩下的那部分。光是一堆不同波长的混在一起，空气分子对短波长的那部分更不客气，把它往四面八方弹开，于是你抬头往哪个方向看，都有蓝光照进眼睛。',
+  visual:{kind:'table',title:'先把两个词分清楚',rows:[['词','说的是什么'],['太阳光','多种波长混在一起，整体接近白光'],['空气分子','尺度远小于可见光波长，会把短波那部分更强烈地弹开']]},
+  glossary:[{abbr:'nm',zh:'纳米',en:'nanometre',desc:'波长单位，可见光大约 400–700 nm'}],
+  questions:[
+   {type:'judge',stem:'「天空是蓝色的，因为空气把蓝光反射给了你。」\n\n对还是错？为什么？（判断题一定要写理由，不然看不出是不是蒙的）',answer:'错',explain:'用「反射」不准。镜面/界面反射是有方向的；这里发生的是尺度远小于波长的粒子把光重新辐射到各个方向，属于散射。方向上的差别正是关键：正因为四面八方都有，你才不是只在某一个角度看到蓝色。',point:'散射 vs 反射'},
+   {type:'choice',stem:'如果地球没有大气层，白天的天空大概是什么颜色？',options:['A. 更深的蓝，因为没有空气干扰','B. 黑色，能看到星星','C. 白色，因为太阳光全到了','D. 红色，因为只剩长波'],answer:'B',explain:'没有大气就没有把光弹到你视线里的东西，除了直视太阳的方向，其他方向基本没有光进来 —— 就是黑的。A 是常见误解：空气不是「干扰」，它正是蓝色的来源。',point:'散射的发生条件'}
+  ],summary:'核心一句：蓝色不是天空的颜色，是被空气散开之后、从各个方向进到你眼睛里的那部分光。',practice:''},
+ L2:{ levelId:'L2', brief:'这一关专门治混。散射、反射、折射、吸收，四个词经常被一把抓。先抓住一个判断口径：光有没有换介质界面、有没有被尺度很小的粒子向多方向重新分配。',
+  visual:{kind:'table',title:'四种「光变了」的对照',rows:[['现象','发生条件','方向特征'],['散射','粒子尺度接近或小于波长','向各个方向散开'],['反射','遇到界面','按确定方向返回'],['折射','穿过不同介质界面','方向偏折，仍成一束'],['吸收','能量被介质吃下','光变弱，转成别的形式']]},
+  glossary:[],
+  questions:[
+   {type:'choice',stem:'彩虹的形成，主要靠下面哪一件事？',options:['A. 空气分子散射','B. 水滴内的折射与内反射','C. 大气吸收了长波','D. 地面反射'],answer:'B',explain:'彩虹是光进水滴时折射、在水滴内部反射、出来再折射，不同波长偏折角不同才分开颜色。它和蓝天是两套机制，别因为都「有颜色」就归成一类。',point:'散射 vs 折射/反射'},
+   {type:'judge',stem:'「只要是光遇到小颗粒，就一定会看到蓝色。」—— 对还是错？为什么？',answer:'错',explain:'颗粒尺度很关键。颗粒远大于波长时（比如云里的水滴），各波长被差不多同样地散开，看到的是白色而不是蓝色。云是白的，就是这个道理。',point:'粒子尺度决定颜色'}
+  ],summary:'分界线：尺度远小于波长 → 挑波长 → 有颜色；尺度接近或更大 → 不太挑 → 偏白。',practice:''},
+ L3:{ levelId:'L3', brief:'现在把机制拆开。散射强度对波长很敏感，波长越短越容易被散开，定量上大致随波长的四次方反比走。那问题就来了：紫光波长比蓝光更短，为什么天不是紫的？',
+  visual:{kind:'steps',title:'推一遍这条链',nodes:['太阳光里各波长都有','短波被更强烈地散开','紫比蓝更短，散得更多','但太阳本身紫光少 + 人眼对紫不敏感','三因素叠加 → 落到「蓝」']},
+  glossary:[{abbr:'Rayleigh',zh:'瑞利散射',en:'Rayleigh scattering',desc:'粒子远小于波长时的散射，强度约与波长的四次方成反比'}],
+  questions:[
+   {type:'blank',stem:'填空：在瑞利散射里，散射强度约与波长的 ______ 次方成反比；所以波长减半，散射强度约变为 ______ 倍。',answer:'4；16',explain:'1/λ⁴，波长减半 → 1/(1/2)⁴ = 16 倍。这也是为什么短波那一头被散得特别厉害。',point:'瑞利散射的波长依赖'},
+   {type:'judge',stem:'「既然紫光散得最厉害，天空本来应该是紫的，只是被大气吸收了。」—— 对还是错？为什么？',answer:'错',explain:'主因不是吸收。一是太阳光谱里紫光本来就比蓝光少，二是人眼三类视锥对紫的响应弱、且蓝的感知占优，三是高层臭氧确实吸收一部分紫外但那不是紫色可见光。是「光源 + 眼睛」共同作用，不是单一原因。',point:'为什么不是紫色'}
+  ],summary:'别只记「短波更容易散」，要把光源光谱和人眼响应一起算进去，结论才站得住。',practice:''},
+ L4:{ levelId:'L4', brief:'把前面那条链拿去用一次。同样的机制，换个几何条件，结论就反过来了。',
+  visual:{kind:'flow',title:'光走过大气的路径长度',nodes:[['正午','路径短','蓝光够用','天蓝'],['日出日落','路径长得多','短波沿途被散没了','剩长波 → 偏红']]},
+  glossary:[],
+  questions:[
+   {type:'scene',stem:'傍晚太阳快落山时，天边是橙红色，头顶却还有点蓝。\n\n你按什么顺序解释这件事？每一步想说明什么？',answer:'参考路径：① 斜射 → 阳光穿过大气的路径比正午长得多；② 短波在长路径里被反复散射掉，直达你眼睛的蓝光大幅减少；③ 剩下的主要是长波（红橙）；④ 头顶方向仍能看到被散射的蓝光，所以不是全红。',rubric:['有没有提到路径变长','有没有把「短波被散掉」和「剩下长波」连起来','有没有解释头顶为什么还蓝'],explain:'关键是把「被散开」和「剩下什么」当成同一件事的两面。只说「红光穿透力强」是背结论，没说机制。',point:'路径长度与颜色'}
+  ],summary:'场景题的判卷重点不是术语，是你有没有把因果链一步一步接起来。',practice:''},
+ L5:{ levelId:'L5', brief:'最后一关改条件。这一步最能看出是真懂还是记住了结论。',
+  visual:{kind:'none',title:'',rows:[],nodes:[]}, glossary:[],
+  questions:[
+   {type:'reverse',stem:'如果这颗行星的大气密度大幅增加（成分不变），白天的天空会怎么变？说清楚你的推理链，并指出你的推断里哪一步最不确定。',answer:'参考：散射更强 → 更多短波被散到视线里，蓝色可能更浓更亮；但路径上也更容易把直射光的短波散尽，整体亮度下降、太阳本身偏黄偏红；密度大到一定程度多次散射占主导，天空可能泛白。最不确定的是「多次散射什么时候开始主导」，没有具体数值不敢下结论。',rubric:['有没有先说清改的是哪个变量','推理链是否自洽','有没有主动标出不确定之处'],explain:'开放题不计对错，看的是：能不能指出具体变量、推理链自不自洽、以及敢不敢说哪一步自己没把握。最后这点比答得漂亮更重要。',point:'变量推演与边界意识'}
+  ],summary:'收官一句：能改条件、能推演、能标出自己不确定的地方，才算真掌握了。',practice:''}
+};
+
+/* ---------- 模型提示词：只带方法论，不带任何个人/领域内容 ---------- */
+const COACH_RULES = [
+'你是「闯关式一对一学习教练」。用户会给你任意一个学习主题，可能来自任何学科：语言、法律、乐器、数学、烹饪、编程、医学、历史、运动、艺术……一律同等对待，不要预设领域。',
+'铁律（不可违背）：',
+'1. 一次只问一个问题，讲完就停，绝不一次性抛出所有题。',
+'2. 讲解极短：brief 不超过 150 字，先给直觉/类比再给定义，然后立刻进入检验。',
+'3. 答错不批评，只解释「为什么错」和「正确的心智模型是什么」，不写「太棒了」「很好的问题」之类客套话。',
+'4. 全程中文、口语化、写实，不夸大、不堆数据。',
+'5. 不编造：事实、日期、数字、专有名词必须真实；不确定的技术细节明说「这块我不确定」，不要硬编。',
+'6. 涉及产业、公司、产品的「现状」时，若无法核实，要明确标注「需联网核实」并写清不确定，不要把旧印象当成现在。',
+'7. 术语和缩写首现给「中文全称 / English Full Name（缩写）」三件套；一段里出现 3 个以上新缩写，先在 glossary 里给对照表；每关结尾把本关新词列进 glossary。中文优先，不要用全缩写句子开头。',
+'8. 每关对应一个「能力」（学完能做到什么），不是知识点清单；由浅入深，前一关是后一关的前提；最后一关是综合场景或模拟追问。',
+'9. 题型混搭，不要连续两题同类型。六种：choice 选择题 / judge 判断题 / blank 填空 / scene 场景题 / reverse 反问题 / code 手撕题。',
+'10. 选择题 4 个选项，其中一个是来自常见误解的最容易踩的坑，其余干扰项要看起来有理；禁止「以上都对/都不对」凑数。',
+'11. 判断题必须追问理由，所以 stem 里要写「为什么」。',
+'12. 不考偏门记忆细节（某配置项默认值之类），不一个考点连出三题，不编造答案。',
+'13. 开放题（scene/reverse/code）没有唯一答案，必须给 rubric 判定要点，不计对错看推理质量。',
+'14. 每题都要标 point（考查的具体考点，简短），用于薄弱点追踪。',
+'15. 难度自适应、进度条、复习排期由前端负责，你不用输出。',
+'输出必须是纯 JSON 对象，不要 markdown 代码块，不要任何解释文字。'
+].join('\n');
+
+function userCtx(){
+  return '本次学习：主题「'+S.topic+'」；目的「'+S.goal+'」；起点「'+S.startLevel+'」。请按这个起点调整用词深度，但不要因此降低结论的准确性。';
+}
+async function callLLM(system, user, retry){
+  const {base, model, key} = S.settings;
+  if(!base || !model || !key) throw new Error('NO_CFG');
+  const url = base.replace(/\/+$/,'') + '/chat/completions';
+  const body = { model, messages:[{role:'system',content:system},{role:'user',content:user}], temperature:0.7 };
+  if(retry !== false) body.response_format = {type:'json_object'};
+  const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+key}, body:JSON.stringify(body) });
+  if(!res.ok){
+    const txt = await res.text().catch(()=>'');
+    if(res.status === 400 && retry !== false) return callLLM(system, user, false);
+    throw new Error('接口返回 '+res.status+'：'+txt.slice(0,200));
+  }
+  const data = await res.json();
+  let content = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+  content = content.trim().replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'').trim();
+  try{ return JSON.parse(content); }
+  catch(e){
+    const a = content.indexOf('{'), b = content.lastIndexOf('}');
+    if(a >= 0 && b > a) return JSON.parse(content.slice(a,b+1));
+    throw new Error('模型返回的不是 JSON：'+content.slice(0,160));
+  }
+}
+async function aiMap(){
+  const out = await callLLM(COACH_RULES, userCtx()+'\n\n任务：把这个主题拆成 5 关（必要时 4 或 6 关），输出关卡地图。\n严格返回：{"levels":[{"id":"L1","title":"","goal":"学完你能做到什么","form":"主要形式"},...]}');
+  if(!out.levels || !out.levels.length) throw new Error('地图里没有关卡');
+  return out.levels.slice(0,6).map((l,i)=>({id:l.id||('L'+(i+1)), title:l.title||('第'+(i+1)+'关'), goal:l.goal||'', form:l.form||''}));
+}
+async function aiPack(level, hint){
+  const prev = S.records.slice(-4).map(r=>r.point+':'+(r.correct===true?'对':r.correct===false?'错':'自评')).join('；');
+  const extra = hint ? '\n\n额外要求：'+hint : '';
+  const out = await callLLM(COACH_RULES, userCtx()+'\n\n任务：为关卡 '+level.id+'「'+level.title+'」生成完整内容包。目标能力：'+level.goal+'。'+
+    '\n最近几题表现：'+(prev||'暂无')+'。据此微调难度：连对就上场景/追问，错了就用更基础的类比重讲。'+extra+
+    '\n严格返回：{"levelId":"'+level.id+'","brief":"<=150字","visual":{"kind":"table|flow|steps|none","title":"","rows":[[字符串,...]],"nodes":[字符串,...]},"glossary":[{"abbr":"","zh":"中文全称","en":"English Full Name","desc":"一句话作用"}],"questions":[{"type":"choice|judge|blank|scene|reverse|code","stem":"","options":["A. ...","B. ...","C. ...","D. ..."]或null,"answer":"","rubric":["要点"]或[],"explain":"判卷解释","point":"考点"}],"summary":"本关一句话","practice":"可选实践验证题，没有就空字符串"}'+
+    '\n要求：questions 给 2-3 道，题型不许连续重复；choice 的 answer 只写字母；judge 的 answer 写「对」或「错」；blank 的 answer 写标准填法；scene/reverse/code 的 answer 写参考答案，rubric 给 3 条要点。');
+  out.levelId = level.id;
+  return out;
+}
+
+/* ---------- 生成 / 开局 ---------- */
+async function generateRoute(engine){
+  const topic = ($('#topicInput') ? $('#topicInput').value : '').trim();
+  if(!topic){ toast('先写个想学的主题，什么都行'); return; }
+  S.topic = topic;
+  S.engine = engine;
+  S.goal = $('#goalSel').value;
+  S.startLevel = $('#levelSel').value;
+  S.levels = []; S.packs = {}; S.records = []; S.weakPoints = []; S.glossary = [];
+  S.cur = 0; S.qIndex = 0; S.phase = 'brief'; S.packsApproved = false; S.verdict = null; S.streak = 0;
+  S.view = 'map'; S.createdAt = today();
+  render();
+  if(engine === 'demo'){
+    S.levels = JSON.parse(JSON.stringify(DEMO_LEVELS));
+    S.packs = JSON.parse(JSON.stringify(DEMO_PACKS));
+    S.topic = DEMO_TOPIC;
+  } else if(engine === 'ai'){
+    try{ S.levels = await withLoading(aiMap(), '正在拆关卡'); }
+    catch(e){ toast(e.message === 'NO_CFG' ? '先去设置里填接口和密钥' : e.message); openModal('maskSettings'); S.view='setup'; render(); return; }
+  } else {
+    S.levels = BLUEPRINT.slice(0,5).map((b,i)=>({id:'L'+(i+1), title:b.title, goal:b.goal.replace('它','「'+topic+'」'), form:b.form}));
+    BLUEPRINT.slice(0,5).forEach((b,i)=>{ S.packs['L'+(i+1)] = buildLocalPack(topic,i); });
+  }
+  S.levels.forEach(l => l.status = 'todo');
+  save(); render();
+}
+
+async function startLevels(){
+  if(!S.levels.length){ toast('还没有关卡'); return; }
+  S.packsApproved = true; S.view = 'learn'; S.cur = 0; S.qIndex = 0;
+  S.phase = 'brief'; S.verdict = null; S.selected = null; S._draft = '';
+  S.levels[0].status = 'doing';
+  save();
+  await ensurePack();
+  render();
+}
+async function ensurePack(){
+  const lv = S.levels[S.cur]; if(!lv) return;
+  if(S.packs[lv.id]) return;
+  if(S.engine === 'ai'){
+    try{ S.packs[lv.id] = await withLoading(aiPack(lv), '正在准备 '+lv.id+' 的内容'); save(); }
+    catch(e){ toast(e.message); }
+  } else {
+    S.packs[lv.id] = buildLocalPack(S.topic, Math.min(S.cur, BLUEPRINT.length-1)); save();
+  }
+}
+async function withLoading(promise, label){
+  const box = $('#maincol');
+  box.innerHTML = '<div class="card" style="text-align:center;padding:50px 20px"><span class="loading"></span>'+esc(label)+'…<div class="muted" style="margin-top:10px">第一次会慢一点，内容生成完就存到本地了</div></div>';
+  try{ return await promise; } finally { /* render 由调用方负责 */ }
+}
+
+/* ---------- 答题 / 判卷 ---------- */
+function curPack(){ return S.packs[S.levels[S.cur] && S.levels[S.cur].id] || {brief:'这一关的内容还没生成。',visual:{kind:'none'},questions:[],glossary:[],summary:''}; }
+function curQ(){ const p = curPack(); return p.questions[S.qIndex] || null; }
+const isOpen = q => q && ['scene','reverse','code'].includes(q.type);
+const TYPE_NAME = {choice:'选择题',judge:'判断题',blank:'填空题',scene:'场景题',reverse:'反问题',code:'手撕题'};
+
+function choose(i){ S.selected = i; render(); }
+function submit(){
+  const q = curQ(); if(!q) return;
+  if(!isOpen(q)){
+    const raw = (S.selected !== null && q.type === 'choice') ? q.options[S.selected] : ($('#answerInput') ? $('#answerInput').value : '');
+    if(!String(raw||'').trim()){ toast('先写个答案，或者点「直接看答案」'); return; }
+    const ua = String(raw).trim();
+    let ok;
+    if(q.type === 'choice') ok = ua.trim().charAt(0).toUpperCase() === String(q.answer).trim().charAt(0).toUpperCase();
+    else if(q.type === 'judge') ok = ua.replace(/\s/g,'').includes(String(q.answer).replace(/\s/g,'')) || String(q.answer).replace(/\s/g,'').includes(ua.replace(/\s/g,''));
+    else ok = norm(ua) === norm(q.answer) || (norm(q.answer).length>2 && norm(ua).includes(norm(q.answer)));
+    judge(ok, ua, q.answer || '');
+  } else {
+    const ua = $('#answerInput') ? $('#answerInput').value.trim() : '';
+    S.verdict = { mode:'open', answer:ua, q };
+    S.phase = 'verdict'; save(); render();
+  }
+}
+function norm(s){ return String(s||'').toLowerCase().replace(/[\s,，。；;：:、（）()【】\[\]"'`*]/g,''); }
+function selfJudge(level){
+  const ok = level === 'ok';
+  const v = S.verdict; const q = v.q;
+  judge(ok, v.answer || (ok?'自评：讲到了':level==='half'?'自评：半懂':'自评：不会'), q.answer||'', level);
+}
+function judge(ok, userAnswer, correctAnswer, selfLevel){
+  const q = curQ();
+  const half = selfLevel === 'half';
+  S.verdict = { mode:'normal', ok, userAnswer, correctAnswer, q, selfLevel:selfLevel||'' };
+  S.phase = 'verdict';
+  S._draft = '';
+  S.records.push({ id:uid(), date:today(), level:S.levels[S.cur].id, type:q.type, question:q.stem, userAnswer, correctAnswer, correct:(ok||half), point:q.point||'', explain:q.explain||'', selfLevel:selfLevel||'' });
+  if(ok && !half){ S.streak++; if(S.streak>=2) S.difficulty = Math.min(3,S.difficulty+1); }
+  else {
+    S.streak = 0;
+    if(!ok) S.difficulty = Math.max(1,S.difficulty-1);
+    touchWeak(q.point || q.stem.slice(0,20), false, half);
+  }
+  (q.glossary||[]).forEach(addGloss);
+  (curPack().glossary||[]).forEach(addGloss);
+  save(); render();
+}
+function dueList(){ return S.weakPoints.filter(w=>w.dueAt<=today()).sort((a,b)=>b.missCount-a.missCount || a.dueAt.localeCompare(b.dueAt)).slice(0,5); }
+function doReviewByIdx(idx, result){ const w = dueList()[idx]; if(w) doReview(w.point, result); }
+function touchWeak(point, passed, gentle){
+  if(!point) return;
+  const w = S.weakPoints.find(x=>x.point===point);
+  if(!w){ S.weakPoints.push({point, missCount:(passed||gentle)?0:1, stage:passed?1:0, dueAt:addDays(today(),1), lastMissedAt:today()}); return; }
+  if(passed){ w.stage = Math.min(4,(w.stage||0)+1); w.dueAt = addDays(today(),[1,3,7,15,30][w.stage]||30); }
+  else if(gentle){ w.stage = 0; w.dueAt = addDays(today(),1); }
+  else { w.missCount++; w.stage = 0; w.dueAt = addDays(today(),1); w.lastMissedAt = today(); }
+}
+function addGloss(g){ if(!g || !g.abbr) return; if(!S.glossary.some(x=>x.abbr===g.abbr)) S.glossary.push(g); }
+function doReview(point, result){
+  if(result === 'no') touchWeak(point, false);
+  else {
+    touchWeak(point, true);
+    if(result === 'half'){
+      const w = S.weakPoints.find(x=>x.point===point);
+      if(w){ w.stage = 0; w.dueAt = addDays(today(),1); }
+    }
+  }
+  S.records.push({id:uid(),date:today(),level:'复习',type:'review',question:'复习：'+point,userAnswer:result==='ok'?'一次答对':result==='half'?'讲解后才答对':'答错',correctAnswer:'',correct:result!=='no',point,explain:'',selfLevel:''});
+  toast(result==='ok'?'通过，复习间隔 +1 档':result==='half'?'算过，但退回到 1 天':'记下了，明天再来');
+  save(); render();
+}
+
+function nextStep(){
+  const p = curPack();
+  S.verdict = null; S.selected = null; S._draft = '';
+  if(S.qIndex + 1 < p.questions.length){
+    S.qIndex++; S.phase = 'quiz';
+  } else {
+    S.levels[S.cur].status = 'passed';
+    S.phase = 'summary';
+  }
+  save(); render();
+}
+async function nextLevel(){
+  if(S.cur + 1 >= S.levels.length){ S.view='done'; S.phase='done'; save(); render(); return; }
+  S.cur++; S.qIndex=0; S.phase='brief'; S.verdict=null; S.selected=null; S._draft='';
+  S.levels[S.cur].status='doing';
+  save();
+  await ensurePack();
+  render();
+}
+
+/* ---------- 节奏指令 ---------- */
+function rhythm(cmd){
+  if(cmd==='pause'){ exportMd(); toast('已存档，下次打开会自动接着这里'); return; }
+  if(cmd==='skip'){
+    if(S.view!=='learn'){ toast('先开一关'); return; }
+    S.levels[S.cur].status='skipped'; nextLevel(); toast('跳过了，不追问'); return;
+  }
+  if(cmd==='answer'){
+    if(S.view!=='learn'||S.phase!=='quiz'){ toast('现在没有待答的题'); return; }
+    const q=curQ(); S.verdict={mode:'normal',ok:false,userAnswer:'（直接看了答案）',correctAnswer:q.answer||'',q,reveal:true}; S._draft='';
+    S.phase='verdict'; S.records.push({id:uid(),date:today(),level:S.levels[S.cur].id,type:q.type,question:q.stem,userAnswer:'（直接看了答案）',correctAnswer:q.answer||'',correct:false,point:q.point||'',explain:q.explain||'',selfLevel:'reveal'});
+    touchWeak(q.point||'',false); save(); render(); return;
+  }
+  if(cmd==='slow'||cmd==='rephrase'||cmd==='more'||cmd==='easy'){
+    if(S.engine!=='ai'){ toast(cmd==='easy'?'已升档：后面会优先上场景题和追问':'自练模式不下发新内容，可以用「导出」把自己的讲义带出去'); if(cmd==='easy'){S.difficulty=Math.min(3,S.difficulty+1);save();} return; }
+    rephrase(cmd); return;
+  }
+  if(cmd==='mock'){
+    if(S.engine!=='ai'){ toast('自练模式可以用 L5 的反问题当模拟面试'); return; }
+    rephrase('mock'); return;
+  }
+}
+async function rephrase(cmd){
+  const hint = {
+    slow:'把当前讲解再拆细，多加一个具体例子，题目难度降一档',
+    rephrase:'换一个全新的类比重讲，禁止复述刚才的话，并出一道同类验证题',
+    more:'追加一道同难度、不同考点的新题',
+    easy:'用户觉得太简单，升一档，换成场景题或追问「为什么」',
+    mock:'切换成连续追问模式：针对当前考点连追三层「为什么」，不再分关卡'
+  }[cmd] || '';
+  try{
+    const lv = S.levels[S.cur];
+    const pack = await withLoading(aiPack(lv,hint),'正在重新讲');
+    pack.levelId = lv.id;
+    S.packs[lv.id] = pack;
+    S.qIndex = 0; S.phase='brief'; S.verdict=null;
+    toast(cmd==='rephrase'?'换了个说法':'内容已更新');
+    save(); render();
+  }catch(e){ toast(e.message); }
+}
+
+/* ---------- 渲染 ---------- */
+function render(){
+  $('#topicChip').textContent = S.topic || '未选择主题';
+  renderProgress(); renderMap(); renderReview(); renderGlossary(); renderMastery(); renderSpark(); renderRhythm(); renderMain();
+  save();
+}
+function progressText(){
+  if(!S.topic) return '📍 进度：还没开局 ｜ 填一个想学的主题就能开始';
+  if(!S.packsApproved) return '📍 进度：路线已出，等你确认 ｜ '+S.levels.length+' 关 ｜ 下一步：确认路线开始 L1';
+  const total = S.levels.length, cur = S.cur+1;
+  const states = S.levels.map((l,i)=> (l.status==='passed'?'✅':l.status==='skipped'?'⏭️':i===S.cur?'🔄':'⬜') ).join(' ｜ ');
+  const p = curPack(), qn = p.questions ? p.questions.length : 0;
+  const dueCnt = S.weakPoints.filter(w=>w.dueAt<=today()).length;
+  const next = S.view==='done' ? '已结课，可导出记录' : (S.qIndex+1)+'/'+qn+' 题';
+  return '📍 进度：L'+cur+' / '+total+' ｜ '+states+' ｜ 本关 '+Math.min(S.qIndex+1,qn)+'/'+qn+' ｜ 待复习 '+dueCnt+' 条 ｜ 下次：'+next;
+}
+function renderProgress(){ $('#progressLine').innerHTML = '<b>'+esc(progressText())+'</b>'; }
+
+function renderMap(){
+  const box = $('#mapSvg');
+  if(!S.levels.length){ box.innerHTML = '<div class="empty">关卡地图会在你填完主题后出现</div>'; return; }
+  const h = 58, pad = 26, W = 220, H = S.levels.length*h + pad*2;
+  const pts = S.levels.map((l,i)=>({ x: 92 + Math.sin(i*1.25)*38, y: pad + i*h + 18 }));
+  let parts = [];
+  for(let i=0;i<pts.length-1;i++){
+    const a=pts[i], b=pts[i+1];
+    parts.push('<path d="M '+a.x+' '+a.y+' C '+(a.x+34)+' '+(a.y+18)+', '+(b.x-34)+' '+(b.y-18)+', '+b.x+' '+b.y+'" fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="'+(S.levels[i+1].status==='todo'?'4 4':'0')+'"/>');
+  }
+  S.levels.forEach((l,i)=>{
+    const p=pts[i], active = i===S.cur && S.packsApproved;
+    const color = l.status==='passed'?'var(--brand)':l.status==='skipped'?'var(--ink-3)':active?'var(--amber)':'var(--line)';
+    const ring = active ? '<circle cx="'+p.x+'" cy="'+p.y+'" r="17" fill="none" stroke="var(--amber)" stroke-width="1.5" opacity=".45"/>' : '';
+    parts.push(ring+'<circle cx="'+p.x+'" cy="'+p.y+'" r="12" fill="'+color+'" stroke="var(--card)" stroke-width="2"/>');
+    parts.push('<text x="'+p.x+'" y="'+(p.y+4)+'" text-anchor="middle" font-size="9" font-weight="700" fill="'+(l.status==='todo'?'var(--ink-3)':'#fff')+'">'+(i+1)+'</text>');
+    const label = (l.title||('第'+(i+1)+'关')).slice(0,7);
+    const lx = p.x < 100 ? p.x+20 : p.x-20, anchor = p.x < 100 ? 'start':'end';
+    parts.push('<text x="'+lx+'" y="'+(p.y+4)+'" text-anchor="'+anchor+'" font-size="11" font-weight="'+(active?'700':'500')+'" fill="'+(active?'var(--amber)':'var(--ink-2)')+'">'+esc(label)+'</text>');
+  });
+  box.innerHTML = '<svg class="map-svg" viewBox="0 0 '+W+' '+H+'" style="height:'+H+'px">'+parts.join('')+'</svg>';
+}
+
+function renderReview(){
+  $('#reviewCount').textContent = S.weakPoints.filter(w=>w.dueAt<=today()).length;
+  const due = dueList();
+  const box = $('#reviewList');
+  if(!due.length){ box.innerHTML = '<div class="empty">暂时没有到期的薄弱点</div>'; return; }
+  box.innerHTML = due.map((w,i)=>
+    '<div class="review-item"><div style="font-weight:600;margin-bottom:5px">'+esc(w.point)+'</div>'+
+    '<div class="due">错 '+(w.missCount||0)+' 次 · 到期 '+esc(w.dueAt)+'</div>'+
+    '<div class="btn-row" style="margin-top:7px">'+
+    '<button class="btn soft sm" onclick="doReviewByIdx('+i+',\'ok\')">一次答对</button>'+
+    '<button class="btn ghost sm" onclick="doReviewByIdx('+i+',\'half\')">讲解后才对</button>'+
+    '<button class="btn ghost sm" onclick="doReviewByIdx('+i+',\'no\')">没答上</button>'+
+    '</div></div>').join('');
+}
+function renderGlossary(){
+  const box = $('#glossaryBox');
+  if(!S.glossary.length){ box.innerHTML='<div class="empty">遇到缩写会自动记到这里<br>（中文全称 / 英文全称 / 一句话作用）</div>'; return; }
+  box.innerHTML = '<table class="glossary-table"><tr><th>缩写</th><th>全称</th></tr>'+
+    S.glossary.slice(-12).map(g=>'<tr><td><code>'+esc(g.abbr)+'</code></td><td>'+esc(g.zh||g.en||'')+'<div class="muted">'+esc(g.en||'')+(g.desc?' · '+esc(g.desc):'')+'</div></td></tr>').join('')+'</table>';
+}
+function levelStat(id){
+  const rs = S.records.filter(r=>r.level===id && r.type!=='review');
+  if(!rs.length) return {pct:0, cls:'', n:0};
+  const ok = rs.filter(r=>r.correct===true).length;
+  const pct = Math.round(ok/rs.length*100);
+  return {pct, cls: pct>=80?'':pct>=50?'warn':'bad', n:rs.length, ok};
+}
+function renderMastery(){
+  const box = $('#masteryBox');
+  if(!S.levels.length){ box.innerHTML='<div class="empty">还没有数据</div>'; return; }
+  const done = S.records.filter(r=>r.type!=='review');
+  const pct = done.length ? Math.round(done.filter(r=>r.correct===true).length/done.length*100) : 0;
+  const R=30, C=2*Math.PI*R;
+  let html = '<div class="ring-wrap"><svg width="76" height="76" viewBox="0 0 76 76">'+
+    '<circle cx="38" cy="38" r="'+R+'" fill="none" stroke="var(--line-soft)" stroke-width="8"/>'+
+    '<circle cx="38" cy="38" r="'+R+'" fill="none" stroke="var(--brand)" stroke-width="8" stroke-linecap="round" stroke-dasharray="'+(C*pct/100)+' '+C+'" transform="rotate(-90 38 38)"/>'+
+    '<text x="38" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink)">'+pct+'%</text></svg>'+
+    '<div><div style="font-weight:700;margin-bottom:3px">总正确率</div><div class="muted">共 '+done.length+' 题 · 难度 '+'★'.repeat(S.difficulty)+'☆'.repeat(3-S.difficulty)+'</div></div></div><div class="divider"></div>';
+  S.levels.forEach((l,i)=>{
+    const st = levelStat(l.id);
+    html += '<div class="meter"><div class="lab"><span>'+esc(l.id)+' '+esc(l.title)+'</span><span>'+st.n+' 题 · '+st.pct+'%</span></div><div class="track"><div class="fill '+st.cls+'" style="width:'+st.pct+'%"></div></div></div>';
+  });
+  box.innerHTML = html;
+}
+function renderSpark(){
+  const svg=$('#spark'), rs=S.records.filter(r=>r.type!=='review');
+  if(rs.length<2){ svg.innerHTML='<text x="10" y="42" font-size="11" fill="var(--ink-3)">答满两题后出曲线</text>'; $('#sparkHint').textContent='每道题都记，答对的也记。'; return; }
+  const n=Math.min(rs.length,24), arr=rs.slice(-n);
+  let run=0; const pts=arr.map((r,i)=>{ run += r.correct===true?1:0; return [ 10 + i*(240/(n-1)), 66 - (run/(i+1))*56 ]; });
+  const line=pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  svg.innerHTML='<line x1="10" y1="10" x2="250" y2="10" stroke="var(--line-soft)" stroke-dasharray="3 3"/>'+
+    '<line x1="10" y1="66" x2="250" y2="66" stroke="var(--line-soft)"/>'+
+    '<polyline points="'+line+'" fill="none" stroke="var(--brand)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>'+
+    pts.map(p=>'<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="2.6" fill="var(--brand)"/>').join('');
+  $('#sparkHint').textContent='累计 '+rs.length+' 题，这条线是「到当前为止的正确率」。';
+}
+function renderRhythm(){
+  const list=[['slow','讲慢点'],['rephrase','换个说法'],['more','再来一题'],['easy','太简单了'],['answer','直接看答案'],['skip','跳过本关'],['mock','模拟面试'],['pause','暂停 / 存档']];
+  $('#rhythmRow').innerHTML = list.map(([k,v])=>'<button class="chip" onclick="rhythm(\''+k+'\')">'+v+'</button>').join('');
+}
+
+function renderMain(){
+  const box = $('#maincol');
+  if(S.view==='setup') box.innerHTML = viewSetup();
+  else if(S.view==='map') box.innerHTML = viewMap();
+  else if(S.view==='learn') box.innerHTML = viewLearn();
+  else box.innerHTML = viewDone();
+}
+function stepsHtml(cur){
+  const names=['铺垫','展示','检验','结算'], keys=['brief','show','quiz','summary'];
+  let curKey = cur;
+  if(['verdict','done'].includes(cur)) curKey='quiz';
+  const ci = keys.indexOf(curKey);
+  return '<div class="step-flow">'+names.map((n,i)=>
+    (i?'<span class="step-arrow">→</span>':'')+'<span class="step '+(i===ci?'on':i<ci?'done':'')+'">'+n+'</span>').join('')+'</div>';
+}
+function viewSetup(){
+  return '<div class="card hero">'+
+    '<div class="kicker">ANY TOPIC · ANYONE</div>'+
+    '<h1>你想学什么？写下来就行。</h1>'+
+    '<p>不用自己设计路径，也不用想该怎么提问。把主题拆成几道关卡，一关一关问你，答错了换个说法重讲，每一步都看得见。语言、法律、乐器、数学、烹饪、编程、医学、历史……一视同仁。</p>'+
+    '<label class="field"><span>学习主题（随便写，越具体越好）</span><input type="text" id="topicInput" placeholder="例如：合同法里的要约与承诺 / 吉他大七和弦 / 傅里叶变换 / 意式浓缩萃取" value="'+esc(S.topic)+'"></label>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
+      '<label class="field"><span>学习目的</span><select id="goalSel">'+opts(['搞懂原理','能上手做','备考 / 面试','纯好奇'],S.goal)+'</select></label>'+
+      '<label class="field"><span>起点水平</span><select id="levelSel">'+opts(['零基础','有点印象','想系统过一遍','备考/面试'],S.startLevel)+'</select></label>'+
+    '</div>'+
+    '<div class="btn-row">'+
+      '<button class="btn primary" onclick="generateRoute(\'ai\')">用 AI 教练生成路线</button>'+
+      '<button class="btn soft" onclick="generateRoute(\'local\')">自练模式（不需要密钥）</button>'+
+      '<button class="btn ghost" onclick="loadDemo()">先看个示例</button>'+
+    '</div>'+
+    '<div class="notice" style="margin-top:14px">AI 教练要在「教练设置」里填自己的接口 / 模型 / 密钥，题目由模型按主题现编；自练模式不编造任何学科事实，只给通用的自检追问链，答案你自己写、自己判。示例包是一个完整可答的中性主题，用来看清整套流程。</div>'+
+    '<div class="feature-grid">'+
+      '<div class="feature"><b>路线按「能力」拆</b><span>每关是「学完你能做到什么」，不是知识点清单</span></div>'+
+      '<div class="feature"><b>一次只问一题</b><span>六种题型混着来，讲得少、问得多</span></div>'+
+      '<div class="feature"><b>进度永远在眼前</b><span>顶栏常驻进度条，不用往上翻</span></div>'+
+      '<div class="feature"><b>缩写首现就解释</b><span>中文全称 / 英文全称（缩写），自动进对照表</span></div>'+
+      '<div class="feature"><b>每道题都记</b><span>答对的也记，正确率曲线才完整</span></div>'+
+      '<div class="feature"><b>薄弱点会回来找你</b><span>1 → 3 → 7 → 15 → 30 天间隔复习</span></div>'+
+    '</div></div>';
+}
+function opts(arr,cur){ return arr.map(x=>'<option '+(x===cur?'selected':'')+'>'+esc(x)+'</option>').join(''); }
+async function loadDemo(){
+  S = Object.assign(blankState(), { topic:DEMO_TOPIC, engine:'demo', view:'learn', packsApproved:true,
+    levels:JSON.parse(JSON.stringify(DEMO_LEVELS)), packs:JSON.parse(JSON.stringify(DEMO_PACKS)),
+    cur:0, qIndex:0, phase:'brief', glossary:[], records:[], weakPoints:[] });
+  S.levels.forEach((l,i)=>l.status = i===0?'doing':'todo');
+  save(); render(); toast('示例包已装载：'+DEMO_TOPIC);
+}
+function viewMap(){
+  if(!S.levels.length) return '<div class="card"><span class="loading"></span>正在拆关卡…</div>';
+  return '<div class="card">'+
+    '<div class="stage-head"><h2>🎯 目标：'+esc(S.topic)+'</h2><span class="pill info">'+S.levels.length+' 关 · '+(S.engine==='ai'?'AI 教练':'自练 / 示例')+'</span></div>'+
+    '<p class="muted" style="margin-top:0">这条路线可以吗？有想跳过的关，或者想加进来的角度，改完再开始。</p>'+
+    '<table class="route-table"><tr><th>关卡</th><th>学完你能做到</th><th>主要形式</th></tr>'+
+    S.levels.map((l,i)=>'<tr><td class="lvl-tag">'+esc(l.id)+'</td><td><b>'+esc(l.title)+'</b><div class="muted">'+esc(l.goal)+'</div></td><td class="muted">'+esc(l.form)+'</td></tr>').join('')+
+    '</table>'+
+    '<div class="btn-row"><button class="btn primary" onclick="startLevels()">这个路线行，开始 L1</button>'+
+    '<button class="btn ghost" onclick="S.view=\'setup\';render()">换个主题 / 重新拆</button></div>'+
+    '</div>'+
+    '<div class="card"><h3>为什么这么拆</h3><div class="muted">由浅到深，前一关是后一关的前提，最后一关是综合场景或被连追三层。每关固定四拍：铺垫（≤150 字）→ 展示（表格 / 流程 / 步骤）→ 检验（一次一题）→ 结算（一句话 + 薄弱点）。</div></div>';
+}
+function visualHtml(v){
+  if(!v || v.kind==='none') return '';
+  let inner='';
+  if(v.kind==='table' && v.rows && v.rows.length){
+    inner = '<table class="route-table">'+v.rows.map((r,i)=>'<tr>'+r.map(c=>i===0?'<th>'+esc(c)+'</th>':'<td>'+esc(c)+'</td>').join('')+'</tr>').join('')+'</table>';
+  } else if((v.kind==='flow'||v.kind==='steps') && v.nodes && v.nodes.length){
+    const nodes = v.nodes.map(n=>Array.isArray(n)?n:[n]);
+    if(v.kind==='flow'){
+      inner='<div style="display:flex;align-items:stretch;gap:6px;flex-wrap:wrap">'+nodes.map((chain,i)=>
+        '<div style="flex:1;min-width:130px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 11px">'+chain.map((n,j)=>'<div style="font-size:12px;padding:2px 0">'+(j?'↓ ':'')+esc(n)+'</div>').join('')+'</div>').join('')+'</div>';
+    } else {
+      inner='<div>'+nodes.map((n,i)=>'<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:7px"><span style="width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700;flex:none">'+(i+1)+'</span><span style="font-size:13px">'+esc(n[0])+'</span></div>').join('')+'</div>';
+    }
+  }
+  return '<div class="block visual"><div class="tag">② 展示 · '+(v.kind==='table'?'对照表':v.kind==='flow'?'流程 / 分叉':'步骤链路')+'</div>'+
+    (v.title?'<div style="font-weight:700;margin-bottom:10px;font-size:14px">'+esc(v.title)+'</div>':'')+inner+'</div>';
+}
+function quizHtml(q, qn, qi){
+  const meta = '<div class="q-meta"><span class="pill info">'+esc(S.levels[S.cur].id)+' · 第 '+(qi+1)+'/'+qn+' 题</span><span class="pill">'+esc(TYPE_NAME[q.type]||'题目')+'</span>'+(S.difficulty>1?'<span class="pill warn">难度 '+'★'.repeat(S.difficulty)+'</span>':'')+'</div>';
+  let body='';
+  if(q.type==='choice' && q.options){
+    body='<div class="options">'+q.options.map((o,i)=>'<button class="option '+(S.selected===i?'sel':'')+'" onclick="choose('+i+')">'+esc(o)+'</button>').join('')+'</div>';
+  } else {
+    body='<textarea id="answerInput" placeholder="'+(isOpen(q)?'写下你的思路，开放题不计对错，看推理链':'写下你的答案')+(q.type==='judge'?'（判断题记得写理由）':'')+'">'+esc(S._draft||'')+'</textarea>';
+  }
+  return '<div class="block quiz">'+meta+'<div class="q-stem">'+esc(q.stem)+'</div>'+body+
+    '<div class="btn-row"><button class="btn primary" onclick="submit()">交卷</button>'+
+    (isOpen(q)?'<span class="muted" style="align-self:center">开放题交卷后自己对照要点判</span>':'')+'</div></div>';
+}
+function verdictHtml(){
+  const v=S.verdict; if(!v) return '';
+  const q=v.q;
+  const head = v.mode==='open'
+    ? '<span class="pill info">开放题 · 自己判</span>'
+    : (v.reveal?'<span class="pill warn">看了答案</span>'
+      :v.selfLevel==='half'?'<span class="pill warn">⚠️ 半懂 · 算过，但退回 1 天</span>'
+      :v.ok?'<span class="pill ok">✅ 对</span>':'<span class="pill bad">❌ 不对</span>');
+  let cls = v.mode==='open'?'':(v.selfLevel==='half'?'':(v.ok?'right':'wrong'));
+  let s='<div class="block verdict '+cls+'"><div class="q-meta">'+head+'<span class="pill">考点：'+esc(q.point||'—')+'</span></div>';
+  if(v.userAnswer) s+='<div class="muted" style="margin-bottom:8px">你的答案：'+esc(String(v.userAnswer).slice(0,300))+'</div>';
+  if(q.answer) s+='<div style="font-weight:600;margin-bottom:6px">参考答案</div><div class="answer-box">'+esc(q.answer)+'</div>';
+  if(q.rubric && q.rubric.length) s+='<div style="font-weight:600;margin:12px 0 4px">判定要点</div><ul class="rubric">'+q.rubric.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul>';
+  if(q.explain) s+='<div style="font-weight:600;margin:12px 0 4px">为什么</div><div style="font-size:13.5px">'+esc(q.explain)+'</div>';
+  if(v.mode==='open'){
+    s+='<div class="divider"></div><div class="muted" style="margin-bottom:8px">对照上面三条要点，你自己判一下：</div><div class="btn-row" style="margin-top:0">'+
+      '<button class="btn soft sm" onclick="selfJudge(\'ok\')">讲到了 ✅</button>'+
+      '<button class="btn ghost sm" onclick="selfJudge(\'half\')">半懂 ⚠️ 回退 1 天</button>'+
+      '<button class="btn ghost sm" onclick="selfJudge(\'no\')">不会 ❌ 记薄弱点</button></div>';
+  } else {
+    s+='<div class="btn-row"><button class="btn primary" onclick="nextStep()">'+(S.qIndex+1<(curPack().questions||[]).length?'下一题':'本关结算')+'</button>'+
+      (S.engine==='ai'?'<button class="btn ghost sm" onclick="rhythm(\'rephrase\')">换个说法再讲一遍</button>':'')+'</div>';
+  }
+  return s+'</div>';
+}
+function viewLearn(){
+  const lv=S.levels[S.cur], p=curPack(), qn=(p.questions||[]).length, q=curQ();
+  let s='<div class="card" style="padding:20px 22px">';
+  s+='<div class="stage-head"><h2>'+esc(lv.id)+' · '+esc(lv.title)+'</h2><span class="pill '+(lv.status==='doing'?'warn':'ok')+'">'+esc(lv.goal)+'</span></div>';
+  s+=stepsHtml(S.phase);
+  if(S.phase==='brief'||S.phase==='show'){
+    s+='<div class="block brief"><div class="tag">① 铺垫 · 先给直觉，再给定义</div><div style="font-size:14.5px;line-height:1.75">'+esc(p.brief)+'</div></div>';
+    s+=visualHtml(p.visual);
+    if(p.glossary && p.glossary.length){
+      s+='<div class="block"><div class="tag">术语先行 · 这一段新词比较多，先看对照表</div><table class="glossary-table"><tr><th>缩写</th><th>中文全称</th><th>英文全称</th><th>一句话作用</th></tr>'+
+        p.glossary.map(g=>'<tr><td><code>'+esc(g.abbr)+'</code></td><td>'+esc(g.zh||'—')+'</td><td>'+esc(g.en||'—')+'</td><td>'+esc(g.desc||'—')+'</td></tr>').join('')+'</table></div>';
+    }
+    s+='<div class="btn-row"><button class="btn primary" onclick="S.phase=\'quiz\';render()">看明白了，开始答题</button></div>';
+  }
+  if(S.phase==='quiz') s+= q ? quizHtml(q,qn,S.qIndex) : '<div class="notice">这一关没有题目，可以直接结算。</div><div class="btn-row"><button class="btn primary" onclick="nextStep()">本关结算</button></div>';
+  if(S.phase==='verdict') s+=verdictHtml();
+  if(S.phase==='summary'){
+    const st=levelStat(lv.id);
+    const wrong=S.records.filter(r=>r.level===lv.id && r.correct===false);
+    s+='<div class="block brief"><div class="tag">④ 结算 · 一句话收口</div><div style="font-size:15px;font-weight:600">'+esc(p.summary||'这关过了。')+'</div></div>';
+    s+='<div class="block"><div class="tag">本关成绩</div><div class="kv"><span>答题数</span><b>'+st.n+' 题</b></div><div class="kv"><span>正确率</span><b>'+st.pct+'%</b></div><div class="kv"><span>待复习薄弱点</span><b>'+S.weakPoints.filter(w=>w.dueAt<=today()).length+' 条</b></div></div>';
+    if(p.practice) s+='<div class="block visual"><div class="tag">动手验证一下</div>'+esc(p.practice)+'</div>';
+    if(p.glossary && p.glossary.length) s+='<div class="block"><div class="tag">术语回扣 · 本关新词</div><table class="glossary-table"><tr><th>缩写</th><th>全称</th><th>作用</th></tr>'+p.glossary.map(g=>'<tr><td><code>'+esc(g.abbr)+'</code></td><td>'+esc(g.zh||g.en||'')+'</td><td>'+esc(g.desc||'')+'</td></tr>').join('')+'</table></div>';
+    if(wrong.length) s+='<div class="block"><div class="tag">记一下这几处</div>'+wrong.map(r=>'<div style="font-size:13px;padding:3px 0">· '+esc(r.point||'未命名考点')+' —— 你的答案：'+esc(String(r.userAnswer).slice(0,60))+'</div>').join('')+'</div>';
+    s+='<div class="btn-row"><button class="btn primary" onclick="nextLevel()">'+(S.cur+1>=S.levels.length?'全部收官':'继续 '+S.levels[Math.min(S.cur+1,S.levels.length-1)].id)+'</button>'+
+      '<button class="btn ghost" onclick="S.qIndex=0;S.phase=\'brief\';render()">把这关再过一遍</button></div>';
+  }
+  return s+'</div>';
+}
+function viewDone(){
+  const done=S.records.filter(r=>r.type!=='review');
+  const pct=done.length?Math.round(done.filter(r=>r.correct===true).length/done.length*100):0;
+  const weak=S.weakPoints.filter(w=>w.missCount>0).slice(0,5);
+  let s='<div class="card hero"><div class="kicker">COURSE COMPLETE</div><h1>'+esc(S.topic)+' · 收官</h1>'+
+    '<p>下面是这一轮的掌握度、薄弱点和能直接拿去用的输出物。记录导出后，换设备也能接着学。</p></div>';
+  s+='<div class="card"><h3 style="font-size:15px;color:var(--ink);margin-bottom:14px">📊 掌握度评分表</h3><table class="route-table"><tr><th>关卡</th><th>状态</th><th>正确率</th><th>薄弱点</th></tr>'+
+    S.levels.map(l=>{const st=levelStat(l.id);const w=S.weakPoints.filter(x=>x.missCount>0 && S.records.some(r=>r.level===l.id&&r.point===x.point)).map(x=>x.point).slice(0,2);
+      return '<tr><td class="lvl-tag">'+esc(l.id)+'</td><td>'+(l.status==='passed'?'<span class="pill ok">✅ 通过</span>':l.status==='skipped'?'<span class="pill">⏭️ 跳过</span>':'<span class="pill warn">⚠️ 未结算</span>')+'</td><td>'+st.pct+'% ('+st.n+' 题)</td><td class="muted">'+esc(w.join('、')||'—')+'</td></tr>';}).join('')+
+    '</table><div class="divider"></div><div class="kv"><span>总体正确率</span><b>'+pct+'%</b></div><div class="kv"><span>累计答题</span><b>'+done.length+' 题</b></div></div>';
+  s+='<div class="card"><h3 style="font-size:15px;color:var(--ink);margin-bottom:10px">🔁 薄弱点清单（可直接拿去复习）</h3>'+
+    (weak.length?weak.map((w,i)=>'<div class="kv"><span>'+(i+1)+'. '+esc(w.point)+'</span><span class="pill warn">错 '+w.missCount+' 次 · '+esc(w.dueAt)+'</span></div>').join(''):'<div class="muted">这一轮没有留下薄弱点。</div>')+'</div>';
+  s+='<div class="card"><h3 style="font-size:15px;color:var(--ink);margin-bottom:10px">🎤 能开口讲的话术</h3><div class="muted" style="margin-bottom:10px">每条 = 一句结论 + 一个能被追问三层的点。挂上你自己的真实经历，没有就标「待实证」—— 别编。</div>'+
+    S.levels.map(l=>{const p=S.packs[l.id];return '<div class="kv"><span style="max-width:80%"><b>'+esc(l.id)+'</b> '+esc((p&&p.summary)||l.goal)+'</span><span class="muted">追问：为什么 / 换条件会怎样 / 边界在哪</span></div>';}).join('')+'</div>';
+  s+='<div class="card"><div class="btn-row" style="margin-top:0"><button class="btn primary" onclick="exportMd()">导出学习记录</button><button class="btn ghost" onclick="S.view=\'setup\';render()">开个新主题</button></div></div>';
+  return s;
+}
+
+/* ---------- 导出 / 导入 ---------- */
+function overviewBlock(){
+  const due=S.weakPoints.filter(w=>w.dueAt<=today());
+  const done=S.records.filter(r=>r.type!=='review');
+  const pct=done.length?Math.round(done.filter(r=>r.correct===true).length/done.length*100):0;
+  let s='> ## 📍 进度总览\n>\n';
+  s+='> 主题：'+S.topic+' ｜ 生成日期：'+S.createdAt+' ｜ 引擎：'+S.engine+'\n>\n';
+  s+='> | 关卡 | 状态 | 正确率 |\n> |---|---|---|\n';
+  S.levels.forEach(l=>{const st=levelStat(l.id);s+='> | '+l.id+' '+(l.title||'')+' | '+(l.status==='passed'?'✅':l.status==='skipped'?'⏭️':'⬜')+' | '+st.pct+'% |\n';});
+  s+='>\n> 累计 '+done.length+' 题 · 正确率 '+pct+'% ｜ 待复习薄弱点 '+due.length+' 条\n';
+  s+='> 下一步：'+(S.view==='done'?'开新主题或回头清薄弱点':'L'+(S.cur+1)+' 第 '+(S.qIndex+1)+' 题')+'\n';
+  return s;
+}
+function exportMd(){
+  if(!S.topic){ toast('还没有学习记录'); return; }
+  let s='# '+S.topic+' · 学习记录\n\n'+overviewBlock()+'\n\n---\n\n## 关卡地图\n\n| 关卡 | 目标（学完能做到） | 主要形式 | 状态 |\n|---|---|---|---|\n';
+  S.levels.forEach(l=>{ s+='| '+l.id+' '+(l.title||'')+' | '+(l.goal||'')+' | '+(l.form||'')+' | '+(l.status==='passed'?'✅':l.status==='skipped'?'⏭️':'⬜')+' |\n'; });
+  s+='\n## 每关核心讲解\n\n';
+  S.levels.forEach(l=>{ const p=S.packs[l.id]; if(p) s+='### '+l.id+' '+(l.title||'')+'\n\n'+(p.brief||'')+'\n\n> 一句话：'+(p.summary||'')+'\n\n'; });
+  s+='\n## 答题记录（答对的也记）\n\n';
+  if(!S.records.length) s+='暂无记录。\n';
+  S.records.forEach((r,i)=>{
+    s+='### '+(i+1)+'. ['+(r.level||'')+' · '+(TYPE_NAME[r.type]||r.type||'复习')+'] '+(r.point||'')+'\n\n';
+    s+='- 题目：'+String(r.question||'').replace(/\n/g,' / ')+'\n';
+    s+='- 你的答案：'+String(r.userAnswer||'')+'\n';
+    s+='- 正确答案：'+String(r.correctAnswer||'（开放题，见要点）')+'\n';
+    s+='- 判定：'+(r.correct===true?'✅ 通过':r.correct===false?'❌ 未通过':'—')+'\n';
+    if(r.explain) s+='- 解析：'+String(r.explain).replace(/\n/g,' ')+'\n';
+    s+='\n';
+  });
+  s+='\n## 术语对照表\n\n';
+  s+= S.glossary.length ? '| 缩写 | 中文全称 | 英文全称 | 一句话作用 |\n|---|---|---|---|\n'+S.glossary.map(g=>'| '+g.abbr+' | '+(g.zh||'—')+' | '+(g.en||'—')+' | '+(g.desc||'—')+' |\n').join('') : '本轮没有新术语。\n';
+  s+='\n## 薄弱点与复习排期\n\n';
+  s+= S.weakPoints.length ? '| 薄弱点 | 错次 | 上次 | 下次到期 |\n|---|---|---|---|\n'+S.weakPoints.map(w=>'| '+w.point+' | '+w.missCount+' | '+(w.lastMissedAt||'—')+' | '+w.dueAt+' |\n').join('') : '暂无薄弱点。\n';
+  s+='\n## 下次从哪继续\n\n'+progressText()+'\n\n---\n\n'+overviewBlock()+'\n';
+  download(S.topic.replace(/[\\/:*?"<>|]/g,'_')+'-'+today()+'.md', s, 'text/markdown;charset=utf-8');
+  toast('Markdown 已导出（开头和结尾各有一份进度总览）');
+}
+function exportJson(){
+  if(!S.topic){ toast('还没有学习记录'); return; }
+  const out = JSON.parse(JSON.stringify(S));
+  delete out.settings; // 密钥绝不写进导出文件
+  out.type='state'; out.exportedAt=new Date().toISOString();
+  download(S.topic.replace(/[\\/:*?"<>|]/g,'_')+'-'+today()+'.json', JSON.stringify(out,null,2), 'application/json;charset=utf-8');
+  toast('JSON 已导出（不含密钥）');
+}
+function download(name, content, mime){
+  const blob=new Blob([content],{type:mime}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+}
+function doImport(){
+  const raw=$('#importText').value.trim();
+  if(!raw){ toast('先粘点东西'); return; }
+  let d; try{ d=JSON.parse(raw); }catch(e){ toast('JSON 解析失败：'+e.message); return; }
+  if(d.type==='state' && d.levels){
+    const keep = S.settings;
+    S=Object.assign(blankState(),d); S.settings=keep;
+    toast('已恢复「'+S.topic+'」的进度');
+  } else if(d.levels && d.packs){
+    S=Object.assign(blankState(),{topic:d.topic||'导入的学习包',engine:'local',levels:d.levels,packs:d.packs,view:'map',packsApproved:false,settings:S.settings});
+    S.levels.forEach(l=>l.status='todo');
+    toast('学习包已导入，确认路线后开始');
+  } else { toast('认不出来：需要导出的 state，或含 levels + packs 的学习包'); return; }
+  save(); closeModal('maskImport'); render();
+}
+
+/* ---------- 事件绑定 ---------- */
+$('#btnSettings').onclick=()=>{
+  $('#cfgBase').value=S.settings.base; $('#cfgModel').value=S.settings.model; $('#cfgKey').value=S.settings.key;
+  $('#cfgLevel').value=S.settings.level; $('#cfgGoal').value=S.settings.goal;
+  openModal('maskSettings');
+};
+$('#btnSaveCfg').onclick=()=>{
+  S.settings={ base:$('#cfgBase').value.trim(), model:$('#cfgModel').value.trim(), key:$('#cfgKey').value.trim(), level:$('#cfgLevel').value, goal:$('#cfgGoal').value };
+  S.startLevel=S.settings.level; S.goal=S.settings.goal;
+  save(); closeModal('maskSettings'); render(); toast('设置已保存（只存在这台设备）');
+};
+$('#btnTestCfg').onclick=async()=>{
+  const b=$('#cfgBase').value.trim(), m=$('#cfgModel').value.trim(), k=$('#cfgKey').value.trim();
+  if(!b||!m||!k){ toast('三个都填一下再测'); return; }
+  const old=S.settings; S.settings={base:b,model:m,key:k,level:old.level,goal:old.goal};
+  const btn=$('#btnTestCfg'); btn.innerHTML='<span class="loading"></span>测试中'; btn.disabled=true;
+  try{ await callLLM('你是一个测试接口。只返回纯 JSON。','返回 {"ok":true}'); toast('连通正常'); }
+  catch(e){ toast('没通：'+e.message); }
+  finally{ S.settings=old; btn.textContent='测一下连通'; btn.disabled=false; }
+};
+$('#btnTheme').onclick=()=>{ const d=document.body.getAttribute('data-theme')==='dark'; document.body.setAttribute('data-theme',d?'light':'dark'); localStorage.setItem(LS+'-theme',d?'light':'dark'); };
+$('#btnNew').onclick=()=>{ if(S.topic && S.records.length && !confirm('开新主题会清掉当前进度，建议先导出记录。继续吗？')) return;
+  const keep=S.settings; S=blankState(); S.settings=keep; save(); render(); };
+$('#btnExportMd').onclick=exportMd;
+$('#btnExportJson').onclick=exportJson;
+$('#btnImport').onclick=()=>openModal('maskImport');
+$('#btnDoImport').onclick=doImport;
+$('#btnReset').onclick=()=>{ if(!confirm('清空这台设备上的全部学习数据？此操作不可撤销。')) return; localStorage.removeItem(LS); S=blankState(); render(); toast('已清空'); };
+document.querySelectorAll('.mask').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('show'); }));
+document.addEventListener('input',e=>{ if(e.target.id==='answerInput') S._draft=e.target.value; });
+if(localStorage.getItem(LS+'-theme')==='dark') document.body.setAttribute('data-theme','dark');
+
+/* 恢复时：若在答题中，重新生成打包数据 */
+if(S.view==='learn' && !S.packs[S.levels[S.cur] && S.levels[S.cur].id] && S.engine!=='ai') ensurePack().then(render);
+render();
+</script>
+</body>
+</html>

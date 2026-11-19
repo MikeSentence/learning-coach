@@ -1,0 +1,8 @@
+Thumbs.db
+.DS_Store
+
+# 学习记录导出属于个人数据，不进仓库
+学习记录/
+*-20??-??-??.md
+*-20??-??-??.json
+learning-data.json
