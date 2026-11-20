@@ -245,10 +245,10 @@ textarea{resize:vertical;min-height:88px;line-height:1.6}
 <div class="mask" id="maskSettings">
   <div class="modal">
     <h2>教练设置</h2>
-    <div class="sub">不填也能用。填了之后，任何主题都能由模型现编关卡和题目。</div>
+    <div class="sub">接口地址和模型名已预填 DeepSeek，只要填自己的 API Key，就能让模型现编关卡和题目。想换任意 OpenAI 兼容接口，直接改这两栏即可；不填 Key 也能用自练模式和示例包。</div>
     <div class="notice" style="margin-bottom:16px">密钥只保存在你这台设备的浏览器里，不会写进导出的学习记录，也不会发到除你填写的接口地址之外的任何地方。</div>
     <label class="field"><span>接口地址（OpenAI 兼容，填到 /v1 为止）</span><input type="text" id="cfgBase" placeholder="https://api.openai.com/v1"></label>
-    <label class="field"><span>模型名</span><input type="text" id="cfgModel" placeholder="gpt-4o-mini"></label>
+    <label class="field"><span>模型名</span><input type="text" id="cfgModel" placeholder="deepseek-flash / deepseek-v4-pro"></label>
     <label class="field"><span>API Key</span><input type="password" id="cfgKey" placeholder="sk-..."></label>
     <label class="field"><span>起点水平</span><select id="cfgLevel"><option value="零基础">零基础 · 什么都别假设我懂</option><option value="有点印象">有点印象 · 听过但说不清</option><option value="想系统过一遍">想系统过一遍</option><option value="备考/面试">备考 / 面试 · 直接上强度</option></select></label>
     <label class="field"><span>学习目的</span><select id="cfgGoal"><option>搞懂原理</option><option>能上手做</option><option>备考 / 面试</option><option>纯好奇</option></select></label>
@@ -293,12 +293,15 @@ function closeModal(id){ $('#'+id).classList.remove('show'); }
 function openModal(id){ $('#'+id).classList.add('show'); }
 
 /* ---------- 状态 ---------- */
+// 默认只预填非敏感的接口与模型名；API Key 永远留空，由使用者自己填。
+// 想换别的模型 / 别的 OpenAI 兼容接口，改这里或在设置里改都行。
+const DEFAULT_LLM = { base:'https://api.deepseek.com/v1', model:'deepseek-flash' };
 const blankState = () => ({
   version:1, topic:'', goal:'搞懂原理', startLevel:'有点印象',
   engine:'local', view:'setup', levels:[], packs:{}, phase:'brief',
   cur:0, qIndex:0, selected:null, verdict:null,
   records:[], weakPoints:[], glossary:[], streak:0, difficulty:1,
-  packsApproved:false, createdAt:today(), settings:{ base:'', model:'', key:'', level:'有点印象', goal:'搞懂原理' }
+  packsApproved:false, createdAt:today(), settings:{ ...DEFAULT_LLM, key:'', level:'有点印象', goal:'搞懂原理' }
 });
 let S = load();
 function load(){
@@ -463,7 +466,7 @@ async function generateRoute(engine){
     S.topic = DEMO_TOPIC;
   } else if(engine === 'ai'){
     try{ S.levels = await withLoading(aiMap(), '正在拆关卡'); }
-    catch(e){ toast(e.message === 'NO_CFG' ? '先去设置里填接口和密钥' : e.message); openModal('maskSettings'); S.view='setup'; render(); return; }
+    catch(e){ toast(e.message === 'NO_CFG' ? '先去设置里填 API Key（接口和模型已预填）' : e.message); openModal('maskSettings'); S.view='setup'; render(); return; }
   } else {
     S.levels = BLUEPRINT.slice(0,5).map((b,i)=>({id:'L'+(i+1), title:b.title, goal:b.goal.replace('它','「'+topic+'」'), form:b.form}));
     BLUEPRINT.slice(0,5).forEach((b,i)=>{ S.packs['L'+(i+1)] = buildLocalPack(topic,i); });
