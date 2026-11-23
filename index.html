@@ -174,6 +174,38 @@ textarea{resize:vertical;min-height:88px;line-height:1.6}
 .voice-set label{cursor:pointer}
 .loading{display:inline-block;width:13px;height:13px;border:2px solid var(--brand-soft);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* ---------- 生成进度条（挂在顶栏里，不遮挡题目） ---------- */
+.genbar{display:flex;align-items:center;gap:10px;max-width:1500px;margin:0 auto;padding:7px 20px;background:var(--brand-soft);border-top:1px solid var(--line);color:var(--brand-ink);font-size:12.5px}
+.genbar[hidden]{display:none}
+.genbar.err{background:var(--red-soft);color:var(--red)}
+.genbar-spin{width:13px;height:13px;border:2px solid var(--brand-soft);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;flex:none}
+.genbar.err .genbar-spin{border-top-color:var(--red)}
+.genbar-label{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:56%}
+.genbar-track{flex:1;height:6px;border-radius:99px;background:var(--card);overflow:hidden;min-width:70px}
+.genbar-fill{height:100%;width:0;border-radius:99px;background:var(--brand);transition:width .35s}
+.genbar.err .genbar-fill{background:var(--red)}
+.genbar-step{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.genbar-close{border:0;background:transparent;color:inherit;font-size:17px;line-height:1;padding:0 2px;opacity:.7}
+/* ---------- 四拍可点 / 回看 ---------- */
+.step{border:1px solid transparent;cursor:pointer;font-family:inherit;transition:.15s}
+.step:hover{border-color:var(--brand);color:var(--brand)}
+.step.real{box-shadow:inset 0 -2px 0 var(--brand-ink)}
+.step-now{display:inline-block;width:5px;height:5px;border-radius:50%;background:currentColor;margin-left:5px;vertical-align:middle;opacity:.65}
+.step-tip{font-size:11px;color:var(--ink-3);margin-left:auto}
+.peek-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--blue-soft);color:var(--blue);border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:14px}
+.peek-bar .btn{flex:none}
+/* ---------- AI 判卷卡片 ---------- */
+.aijudge{border:1px solid var(--line);border-left:3px solid var(--purple);border-radius:10px;background:var(--bg);padding:12px 14px;margin-top:12px;font-size:13px}
+.aijudge .ai-line{padding:3px 0;color:var(--ink-2)}
+.aijudge .ai-line b{color:var(--ink)}
+/* ---------- 能力扩展（Skills / MCP） ---------- */
+.ext-fold{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:14px 0;background:var(--bg)}
+.ext-fold>summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--ink)}
+.ext-fold>div.muted{margin-top:10px}
+.ext-item{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:9px;background:var(--card)}
+.ext-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ext-item label.field{margin-bottom:8px}
+.ext-item textarea{min-height:58px}
 .footer{max-width:1500px;margin:0 auto;padding:0 20px 30px;color:var(--ink-3);font-size:11.5px;text-align:center;line-height:1.7}
 </style>
 </head>
@@ -192,6 +224,14 @@ textarea{resize:vertical;min-height:88px;line-height:1.6}
       <button class="icon-btn" id="btnHistory">历史主题</button>
       <button class="icon-btn" id="btnNew">＋ 新主题</button>
     </div>
+  </div>
+  <!-- 生成进度条：挂在顶栏内部，随顶栏常驻，绝不覆盖题目页面 -->
+  <div class="genbar" id="genBar" hidden>
+    <span class="genbar-spin" id="genSpin"></span>
+    <span class="genbar-label" id="genLabel">准备中…</span>
+    <div class="genbar-track"><div class="genbar-fill" id="genFill"></div></div>
+    <span class="genbar-step" id="genStep">1/1</span>
+    <button class="genbar-close" id="genClose" title="隐藏这条提示（不影响生成）">×</button>
   </div>
 </div>
 
@@ -268,6 +308,7 @@ textarea{resize:vertical;min-height:88px;line-height:1.6}
     <label class="field"><span>接口地址（OpenAI 兼容，填到 /v1 为止）</span><input type="text" id="cfgBase" placeholder="https://api.openai.com/v1"></label>
     <label class="field"><span>模型名</span><input type="text" id="cfgModel" placeholder="deepseek-flash / deepseek-v4-pro"></label>
     <label class="field"><span>API Key</span><input type="password" id="cfgKey" placeholder="sk-..."></label>
+    <div class="notice" id="cfgDiag" style="margin:2px 0 14px;font-size:12px;line-height:1.7;white-space:normal;word-break:break-all"></div>
     <label class="field"><span>起点水平</span><select id="cfgLevel"><option value="零基础">零基础 · 什么都别假设我懂</option><option value="有点印象">有点印象 · 听过但说不清</option><option value="想系统过一遍">想系统过一遍</option><option value="备考/面试">备考 / 面试 · 直接上强度</option></select></label>
     <label class="field"><span>学习目的</span><select id="cfgGoal"><option>搞懂原理</option><option>能上手做</option><option>备考 / 面试</option><option>纯好奇</option></select></label>
     <div class="divider"></div>
@@ -276,6 +317,28 @@ textarea{resize:vertical;min-height:88px;line-height:1.6}
     <div class="voice-set"><input type="checkbox" id="cfgVoiceAuto"><label for="cfgVoiceAuto">换题时自动朗读（部分浏览器要先手动点一次朗读）</label></div>
     <div class="muted" style="margin-bottom:10px">顶栏 🔊 读当前这一屏，再点一下停止；🎤 把说的话填进答案框（用于需要写字的题，选择题直接点选项）。语音输入需要麦克风权限。</div>
     <div class="muted" id="voiceSupport" style="margin-bottom:12px"></div>
+
+    <details class="ext-fold" id="extFold">
+      <summary>🧩 能力扩展：Skills / MCP（点开自己配）</summary>
+      <div class="muted">
+        <b>Skills（技能）</b>：一段可复用的教学指令，启用后写进系统提示词，影响出题风格与判卷口径，可自由增删改。<br>
+        <b>MCP（模型上下文协议，Model Context Protocol）</b>：完整形态需要跑本地或远程服务进程。本页是纯前端单文件，<b>不启动进程、也不执行工具调用循环</b>；这里登记的是远程 HTTP 端点与能力声明，只作为「可用知识来源」注入提示词，让模型出题 / 判卷时参考。浏览器直连外部端点还受跨源资源共享（Cross-Origin Resource Sharing，CORS）限制；要真正跑工具循环，需要支持 MCP 的网关或代理。<br>
+        端点 Token 只存这台设备的浏览器，<b>不进提示词、不进导出文件</b>。
+      </div>
+      <div class="seg" style="margin:12px 0 10px">
+        <button type="button" id="tabSkill" class="on" onclick="switchExtTab('skills')">Skills 技能</button>
+        <button type="button" id="tabMcp" onclick="switchExtTab('mcp')">MCP 知识源</button>
+      </div>
+      <div id="extBox"></div>
+      <div class="btn-row" style="margin-top:6px">
+        <button class="btn ghost sm" id="btnPreviewPrompt">预览注入内容</button>
+        <button class="btn ghost sm" id="btnExportExt">导出配置</button>
+        <button class="btn ghost sm" id="btnImportExt">导入配置</button>
+        <button class="btn ghost sm" id="btnResetExt">恢复内置模板</button>
+      </div>
+      <textarea id="extImportText" placeholder="把导出的能力配置 JSON 粘到这里，再点一次「导入配置」" style="min-height:70px;font-size:12px;display:none;margin-top:8px"></textarea>
+    </details>
+
     <div class="sub" id="cfgSavedHint" style="margin:12px 0 0;min-height:16px">改动会自动保存，下次打开自动带出</div>
     <div class="btn-row">
       <button class="btn primary" id="btnSaveCfg">完成</button>
@@ -325,6 +388,16 @@ textarea{resize:vertical;min-height:88px;line-height:1.6}
   </div>
 </div>
 
+<!-- 提示词预览弹窗 -->
+<div class="mask" id="maskPrompt">
+  <div class="modal" style="width:min(680px,100%)">
+    <h2>实际注入的 system 提示词</h2>
+    <div class="sub">这是每次生成 / 判卷时随请求发出的系统提示词。用来核对 Skills 和 MCP 声明有没有生效；API Key 与 MCP Token 都不在里面。</div>
+    <textarea id="promptPreview" readonly style="min-height:320px;font-family:ui-monospace,Consolas,monospace;font-size:12px"></textarea>
+    <div class="btn-row"><button class="btn primary" onclick="closeModal('maskPrompt')">关闭</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -335,6 +408,7 @@ textarea{resize:vertical;min-height:88px;line-height:1.6}
    - 内容：主题由用户输入；可由模型生成，或自练骨架，或导入知识包
    ========================================================= */
 const LS = 'universal-learning-coach-v1';
+const CFG_KEY = LS + '-cfg';   // 配置单独存一份：刷新 / 换主题 / 清空学习数据 / 导入都动不到它
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const today = () => new Date().toISOString().slice(0,10);
@@ -348,23 +422,94 @@ function openModal(id){ $('#'+id).classList.add('show'); }
 // 默认只预填非敏感的接口与模型名；API Key 永远留空，由使用者自己填。
 // 想换别的模型 / 别的 OpenAI 兼容接口，改这里或在设置里改都行。
 const DEFAULT_LLM = { base:'https://api.deepseek.com/v1', model:'deepseek-flash' };
+
+/* ---------- 能力扩展：Skills（技能指令）/ MCP（模型上下文协议） ----------
+   纯前端单文件不启动进程、不跑工具循环：Skills 是可编辑的教学指令，
+   MCP 是远程端点 + 能力声明，两者都只以文本形式注入 system 提示词。 */
+const BUILTIN_SKILLS = [
+  { id:'sk1', name:'费曼式讲解', enabled:true, prompt:'每个概念先用一句大白话给直觉，再给定义；不许直接抛术语，讲解不超过 150 字。' },
+  { id:'sk2', name:'先类比后公式', enabled:true, prompt:'优先用生活里可感知的类比建立心智模型，最后才给形式化表达；类比要贴切，不硬凑。' },
+  { id:'sk3', name:'苏格拉底追问', enabled:false, prompt:'每关至少有一题连续追问「为什么」，要求说出推理链，而不是复述结论。' },
+  { id:'sk4', name:'备考冲刺', enabled:false, prompt:'按考试口径出题，侧重易错点和边界条件；解析里点明这个考点想考什么。' },
+  { id:'sk5', name:'错题回炉', enabled:false, prompt:'针对近期答错的考点换一个全新角度重讲，并出同类验证题，禁止复述原话。' }
+];
+const blankExt = () => ({ skills:JSON.parse(JSON.stringify(BUILTIN_SKILLS)), mcp:[], injectSkills:true, injectMcp:true });
+function ext(){
+  if(!S.settings.ext || typeof S.settings.ext!=='object') S.settings.ext = blankExt();
+  const e = S.settings.ext;
+  if(!Array.isArray(e.skills)) e.skills = [];
+  if(!Array.isArray(e.mcp)) e.mcp = [];
+  return e;
+}
+function extensionPrompt(onlyMcp){
+  const e=ext(); let out='';
+  if(!onlyMcp && e.injectSkills!==false){
+    const on=(e.skills||[]).filter(x=>x.enabled && String(x.prompt||'').trim());
+    if(on.length) out+='\n\n【已启用的教学技能 Skills（必须遵守；与上面规则冲突时以这些约束优先）】\n'
+      +on.map((x,i)=>(i+1)+'. '+x.name+'：'+String(x.prompt).trim()).join('\n');
+  }
+  if(e.injectMcp!==false){
+    const on=(e.mcp||[]).filter(x=>x.enabled && (x.name||x.desc||x.url));
+    if(on.length) out+='\n\n【可用知识来源 MCP（声明式上下文，不是可执行工具）】\n'
+      +'下面是用户登记的外部知识源。出题与判卷时可引用其覆盖范围，但本页不会真的调用它们；'
+      +'没有把握的内容一律按「不确定」处理，绝不伪造来自这些来源的查询结果。\n'
+      +on.map((x,i)=>(i+1)+'. '+(x.name||'未命名')+'：'+(x.desc||'未提供能力说明')+(x.url?'（端点：'+x.url+'）':'')).join('\n');
+  }
+  return out;
+}
+const fullSystem = (base, onlyMcp) => String(base||'') + extensionPrompt(onlyMcp);
+
 const blankState = () => ({
   version:1, topic:'', goal:'搞懂原理', startLevel:'有点印象',
   engine:'local', view:'setup', levels:[], packs:{}, phase:'brief',
-  cur:0, qIndex:0, selected:null, verdict:null,
+  cur:0, qIndex:0, selected:null, verdict:null, peek:null,
   records:[], weakPoints:[], glossary:[], streak:0, difficulty:1,
   packsApproved:false, createdAt:today(),
-  settings:{ ...DEFAULT_LLM, key:'', level:'有点印象', goal:'搞懂原理', voiceAuto:false, voiceRate:1 }
+  settings:{ ...DEFAULT_LLM, key:'', level:'有点印象', goal:'搞懂原理', voiceAuto:false, voiceRate:1, ext:blankExt() }
 });
 let S = load();
-function load(){
-  try{ const raw = localStorage.getItem(LS); if(!raw) return blankState();
-    const d = JSON.parse(raw), b = blankState();
-    d.settings = Object.assign({}, b.settings, d.settings || {});  // 新增设置项对老数据补齐
-    return Object.assign(b, d);
-  }catch(e){ return blankState(); }
+/* 配置合并：老存档缺的新字段自动补齐，Skills / MCP 结构不合法就回退到内置模板 */
+function mergeSettings(raw){
+  const b = blankState().settings, d = Object.assign({}, b, raw || {});
+  const be = b.ext, e = Object.assign({}, be, d.ext || {});
+  if(!Array.isArray(e.skills)) e.skills = be.skills;
+  if(!Array.isArray(e.mcp)) e.mcp = be.mcp;
+  d.ext = e;
+  return d;
 }
-function save(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){ toast('本地存储写不进去，记得导出备份'); } }
+/* 配置以独立存档为准；老版本只存在主状态里时自动迁移过来 */
+function loadCfg(fallback){
+  let raw = null;
+  try{ raw = localStorage.getItem(CFG_KEY); }catch(e){}
+  let src = null;
+  if(raw){ try{ src = JSON.parse(raw); }catch(e){} }
+  if(!src || typeof src !== 'object'){
+    src = fallback || null;
+    if(src){ try{ localStorage.setItem(CFG_KEY, JSON.stringify(src)); }catch(e){} }
+  }
+  return mergeSettings(src);
+}
+function load(){
+  try{
+    const raw = localStorage.getItem(LS);
+    if(!raw) return Object.assign(blankState(), { settings: loadCfg(null) });
+    const d = JSON.parse(raw), b = blankState();
+    d.settings = loadCfg(d.settings);
+    return Object.assign(b, d);
+  }catch(e){ return Object.assign(blankState(), { settings: loadCfg(null) }); }
+}
+let cfgWriteWarned = false;
+function saveCfg(){
+  try{ localStorage.setItem(CFG_KEY, JSON.stringify(S.settings)); cfgWriteWarned = false; return true; }
+  catch(e){
+    if(!cfgWriteWarned){ cfgWriteWarned = true; toast('配置写不进浏览器存储（无痕模式或空间满），刷新会丢，请及时导出备份'); }
+    return false;
+  }
+}
+function save(){
+  saveCfg();   // 配置先写、必写；学习数据写失败也不影响配置
+  try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){ toast('本地存储写不进去，记得导出备份'); }
+}
 
 /* ---------- 通用关卡骨架（不编造任何学科事实） ---------- */
 const BLUEPRINT = [
@@ -465,17 +610,28 @@ const COACH_RULES = [
 function userCtx(){
   return '本次学习：主题「'+S.topic+'」；目的「'+S.goal+'」；起点「'+S.startLevel+'」。请按这个起点调整用词深度，但不要因此降低结论的准确性。';
 }
-async function callLLM(system, user, retry){
+async function callLLM(system, user, retry, noExt){
   const {base, model, key} = S.settings;
   if(!base || !model || !key) throw new Error('NO_CFG');
   const url = base.replace(/\/+$/,'') + '/chat/completions';
-  const body = { model, messages:[{role:'system',content:system},{role:'user',content:user}], temperature:0.7 };
+  // noExt === true 完全不注入（连通性测试）；=== 'mcp' 只注入知识来源（开放题判卷，避免教学技能带偏）
+  const body = { model, messages:[{role:'system',content:noExt===true?system:fullSystem(system, noExt==='mcp')},{role:'user',content:user}], temperature:0.7 };
   if(retry !== false) body.response_format = {type:'json_object'};
-  const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+key}, body:JSON.stringify(body) });
+  const timeoutMs = noExt===true ? 20000 : 180000;
+  const ctrl = new AbortController();
+  const timer = setTimeout(()=>ctrl.abort(), timeoutMs);
+  let res;
+  try{
+    res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+key}, body:JSON.stringify(body), signal:ctrl.signal });
+  }catch(err){
+    if(err && err.name === 'AbortError') throw new Error('请求超时（'+(timeoutMs/1000)+' 秒没响应）：网络或代理卡住了');
+    throw new Error('浏览器没能发出请求（'+String(err&&err.message||err)+'）：多为内置预览面板的安全策略拦截、断网或代理。改用普通浏览器标签打开 http://127.0.0.1:8765/index.html 或线上 Pages 再试');
+  }finally{ clearTimeout(timer); }
   if(!res.ok){
     const txt = await res.text().catch(()=>'');
-    if(res.status === 400 && retry !== false) return callLLM(system, user, false);
-    throw new Error('接口返回 '+res.status+'：'+txt.slice(0,200));
+    if(res.status === 400 && retry !== false) return callLLM(system, user, false, noExt);
+    const tips = {401:'API Key 不对或已失效；检查是不是把接口地址粘进了 Key 栏',402:'账户余额不足，去控制台充值',403:'没有权限访问这个模型',404:'接口地址不对：填到 /v1 为止，不要带 /chat/completions',429:'请求太频繁或额度用尽，稍等再试',500:'接口服务端错误',502:'接口网关错误',503:'接口暂时不可用'}[res.status] || '';
+    throw new Error('接口返回 '+res.status+(tips?'：'+tips:'')+'｜原文：'+txt.slice(0,160));
   }
   const data = await res.json();
   let content = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
@@ -503,16 +659,45 @@ async function aiPack(level, hint){
   return out;
 }
 
+/* ---------- 生成进度条：只更新顶栏内的那一条，绝不重建 #maincol ---------- */
+let genBusy=false, genHideTimer=null;
+function genShow(label, step, total, state){
+  clearTimeout(genHideTimer);
+  const bar=$('#genBar'); if(!bar) return;
+  const stepN=step||1, totalN=total||1, done=(state==='done'||state==='err');
+  bar.hidden=false;
+  bar.classList.toggle('err', state==='err');
+  $('#genLabel').textContent=label;
+  $('#genStep').textContent=state==='err'?'失败':state==='done'?'完成':(stepN+'/'+totalN);
+  $('#genFill').style.width=done?'100%':Math.round((stepN-0.5)/totalN*100)+'%';
+  $('#genSpin').style.display=done?'none':'';
+  genBusy=!done;
+}
+function genHide(){ const bar=$('#genBar'); if(bar){ bar.hidden=true; bar.classList.remove('err'); } genBusy=false; }
+function genHideLater(ms){ clearTimeout(genHideTimer); genHideTimer=setTimeout(genHide, ms); }
+async function withGen(promise, label, step, total){
+  genShow(label, step||1, total||1);
+  try{
+    const r=await promise;
+    genShow(label+' · 完成', step||1, total||1, 'done'); genHideLater(1400);
+    return r;
+  }catch(e){
+    genShow(label+' · 失败：'+String(e.message||e).slice(0,60), step||1, total||1, 'err'); genHideLater(6000);
+    throw e;
+  }
+}
+
 /* ---------- 生成 / 开局 ---------- */
 async function generateRoute(engine){
   const topic = ($('#topicInput') ? $('#topicInput').value : '').trim();
   if(!topic){ toast('先写个想学的主题，什么都行'); return; }
+  if(genBusy){ toast('上一轮还在生成，等进度条跑完再开局'); return; }
   S.topic = topic;
   S.engine = engine;
   S.goal = $('#goalSel').value;
   S.startLevel = $('#levelSel').value;
   S.levels = []; S.packs = {}; S.records = []; S.weakPoints = []; S.glossary = [];
-  S.cur = 0; S.qIndex = 0; S.phase = 'brief'; S.packsApproved = false; S.verdict = null; S.streak = 0;
+  S.cur = 0; S.qIndex = 0; S.phase = 'brief'; S.packsApproved = false; S.verdict = null; S.streak = 0; S.peek = null;
   S.view = 'map'; S.createdAt = today();
   render();
   if(engine === 'demo'){
@@ -520,8 +705,18 @@ async function generateRoute(engine){
     S.packs = JSON.parse(JSON.stringify(DEMO_PACKS));
     S.topic = DEMO_TOPIC;
   } else if(engine === 'ai'){
-    try{ S.levels = await withLoading(aiMap(), '正在拆关卡'); }
-    catch(e){ toast(e.message === 'NO_CFG' ? '先去设置里填 API Key（接口和模型已预填）' : e.message); openModal('maskSettings'); S.view='setup'; render(); return; }
+    try{
+      genShow('① 拆解关卡路线', 1, 2);
+      S.levels = await aiMap();
+      genShow('② 生成 L1 的题目', 2, 2);
+      try{ S.packs[S.levels[0].id] = await aiPack(S.levels[0]); }
+      catch(e){ /* L1 生成失败不阻断开局，ensurePack 会按需重试 */ }
+      genShow('路线与 L1 题目已就绪', 2, 2, 'done'); genHideLater(1600);
+    }catch(e){
+      genShow('生成失败：'+String(e.message||e).slice(0,60), 1, 2, 'err'); genHideLater(6000);
+      toast(e.message === 'NO_CFG' ? '先去设置里填 API Key（接口和模型已预填）' : e.message);
+      openModal('maskSettings'); S.view='setup'; render(); return;
+    }
   } else {
     S.levels = BLUEPRINT.slice(0,5).map((b,i)=>({id:'L'+(i+1), title:b.title, goal:b.goal.replace('它','「'+topic+'」'), form:b.form}));
     BLUEPRINT.slice(0,5).forEach((b,i)=>{ S.packs['L'+(i+1)] = buildLocalPack(topic,i); });
@@ -533,7 +728,7 @@ async function generateRoute(engine){
 async function startLevels(){
   if(!S.levels.length){ toast('还没有关卡'); return; }
   S.packsApproved = true; S.view = 'learn'; S.cur = 0; S.qIndex = 0;
-  S.phase = 'brief'; S.verdict = null; S.selected = null; S._draft = '';
+  S.phase = 'brief'; S.verdict = null; S.selected = null; S._draft = ''; S.peek = null;
   S.levels[0].status = 'doing';
   save();
   await ensurePack();
@@ -543,16 +738,26 @@ async function ensurePack(){
   const lv = S.levels[S.cur]; if(!lv) return;
   if(S.packs[lv.id]) return;
   if(S.engine === 'ai'){
-    try{ S.packs[lv.id] = await withLoading(aiPack(lv), '正在准备 '+lv.id+' 的内容'); save(); }
+    try{ S.packs[lv.id] = await withGen(aiPack(lv), '正在生成 '+lv.id+' 的题目'); save(); }
     catch(e){ toast(e.message); }
   } else {
     S.packs[lv.id] = buildLocalPack(S.topic, Math.min(S.cur, BLUEPRINT.length-1)); save();
   }
 }
-async function withLoading(promise, label){
-  const box = $('#maincol');
-  box.innerHTML = '<div class="card" style="text-align:center;padding:50px 20px"><span class="loading"></span>'+esc(label)+'…<div class="muted" style="margin-top:10px">第一次会慢一点，内容生成完就存到本地了</div></div>';
-  try{ return await promise; } finally { /* render 由调用方负责 */ }
+/* 整批预生成：一关一关出，进度条显示 n/N，期间不重建主舞台 */
+async function pregenAll(){
+  if(S.engine!=='ai'){ toast('只有 AI 教练模式需要预生成'); return; }
+  if(genBusy){ toast('正在生成中，稍等一下'); return; }
+  const todo=S.levels.filter(l=>!S.packs[l.id]);
+  if(!todo.length){ toast('所有关卡的题目都已生成'); return; }
+  const total=todo.length;
+  for(let i=0;i<total;i++){
+    genShow('预生成题目 '+(i+1)+'/'+total+' · '+todo[i].id, i+1, total);
+    try{ S.packs[todo[i].id]=await aiPack(todo[i]); save(); }
+    catch(e){ toast(todo[i].id+' 没生成成功：'+e.message); }
+  }
+  genShow('预生成完成 · 共 '+total+' 关', total, total, 'done'); genHideLater(1800);
+  save(); render();
 }
 
 /* ---------- 答题 / 判卷 ---------- */
@@ -564,6 +769,7 @@ const TYPE_NAME = {choice:'选择题',judge:'判断题',blank:'填空题',scene:
 function choose(i){ S.selected = i; render(); }
 function submit(){
   const q = curQ(); if(!q) return;
+  S.peek = null;
   if(!isOpen(q)){
     const raw = (S.selected !== null && q.type === 'choice') ? q.options[S.selected] : ($('#answerInput') ? $('#answerInput').value : '');
     if(!String(raw||'').trim()){ toast('先写个答案，或者点「直接看答案」'); return; }
@@ -583,10 +789,11 @@ function norm(s){ return String(s||'').toLowerCase().replace(/[\s,，。；;：:
 function selfJudge(level){
   const ok = level === 'ok';
   const v = S.verdict; const q = v.q;
-  judge(ok, v.answer || (ok?'自评：讲到了':level==='half'?'自评：半懂':'自评：不会'), q.answer||'', level);
+  judge(ok, v.answer || (ok?'自评：讲到了':level==='half'?'自评：半懂':'自评：不会'), q.answer||'', level, q);
 }
-function judge(ok, userAnswer, correctAnswer, selfLevel){
-  const q = curQ();
+function judge(ok, userAnswer, correctAnswer, selfLevel, qOverride){
+  const q = qOverride || curQ();
+  S.peek = null;
   const half = selfLevel === 'half';
   S.verdict = { mode:'normal', ok, userAnswer, correctAnswer, q, selfLevel:selfLevel||'' };
   S.phase = 'verdict';
@@ -629,7 +836,7 @@ function doReview(point, result){
 
 function nextStep(){
   const p = curPack();
-  S.verdict = null; S.selected = null; S._draft = '';
+  S.verdict = null; S.selected = null; S._draft = ''; S.peek = null;
   if(S.qIndex + 1 < p.questions.length){
     S.qIndex++; S.phase = 'quiz';
   } else {
@@ -640,7 +847,7 @@ function nextStep(){
 }
 async function nextLevel(){
   if(S.cur + 1 >= S.levels.length){ S.view='done'; S.phase='done'; save(); render(); return; }
-  S.cur++; S.qIndex=0; S.phase='brief'; S.verdict=null; S.selected=null; S._draft='';
+  S.cur++; S.qIndex=0; S.phase='brief'; S.verdict=null; S.selected=null; S._draft=''; S.peek=null;
   S.levels[S.cur].status='doing';
   save();
   await ensurePack();
@@ -657,7 +864,7 @@ function rhythm(cmd){
   if(cmd==='answer'){
     if(S.view!=='learn'||S.phase!=='quiz'){ toast('现在没有待答的题'); return; }
     const q=curQ(); S.verdict={mode:'normal',ok:false,userAnswer:'（直接看了答案）',correctAnswer:q.answer||'',q,reveal:true}; S._draft='';
-    S.phase='verdict'; S.records.push({id:uid(),date:today(),level:S.levels[S.cur].id,type:q.type,question:q.stem,userAnswer:'（直接看了答案）',correctAnswer:q.answer||'',correct:false,point:q.point||'',explain:q.explain||'',selfLevel:'reveal'});
+    S.phase='verdict'; S.peek=null; S.records.push({id:uid(),date:today(),level:S.levels[S.cur].id,type:q.type,question:q.stem,userAnswer:'（直接看了答案）',correctAnswer:q.answer||'',correct:false,point:q.point||'',explain:q.explain||'',selfLevel:'reveal'});
     touchWeak(q.point||'',false); save(); render(); return;
   }
   if(cmd==='slow'||cmd==='rephrase'||cmd==='more'||cmd==='easy'){
@@ -679,7 +886,7 @@ async function rephrase(cmd){
   }[cmd] || '';
   try{
     const lv = S.levels[S.cur];
-    const pack = await withLoading(aiPack(lv,hint),'正在重新讲');
+    const pack = await withGen(aiPack(lv,hint),'正在重新讲 / 换题');
     pack.levelId = lv.id;
     S.packs[lv.id] = pack;
     S.qIndex = 0; S.phase='brief'; S.verdict=null;
@@ -779,7 +986,7 @@ async function jumpToLevel(i){
   if(i===S.cur && S.view==='learn'){ toast('已经在这一关了'); return; }
   const ahead = i>S.cur && S.levels.slice(S.cur,i).some(l=>l.status==='todo');
   if(ahead && !confirm('L'+(i+1)+' 前面还有没过完的关。跳过去会跳过那几关，确定吗？')) return;
-  S.cur=i; S.qIndex=0; S.phase='brief'; S.verdict=null; S.selected=null; S._draft=''; S.view='learn';
+  S.cur=i; S.qIndex=0; S.phase='brief'; S.verdict=null; S.selected=null; S._draft=''; S.peek=null; S.view='learn';
   if(S.levels[i].status==='todo') S.levels[i].status='doing';
   save();
   await ensurePack();               // 跳到没生成过内容的关也照样能学
@@ -916,14 +1123,30 @@ function renderMain(){
   else if(S.view==='learn') box.innerHTML = viewLearn();
   else box.innerHTML = viewDone();
 }
-function stepsHtml(cur){
-  const names=['铺垫','展示','检验','结算'], keys=['brief','show','quiz','summary'];
-  let curKey = cur;
-  if(['verdict','done'].includes(cur)) curKey='quiz';
-  const ci = keys.indexOf(curKey);
-  return '<div class="step-flow">'+names.map((n,i)=>
-    (i?'<span class="step-arrow">→</span>':'')+'<span class="step '+(i===ci?'on':i<ci?'done':'')+'">'+n+'</span>').join('')+'</div>';
+const PHASE_TABS = [['brief','铺垫'],['show','展示'],['quiz','检验'],['summary','结算']];
+const PHASE_NAME = {brief:'铺垫',show:'展示',quiz:'检验',summary:'结算'};
+function phaseTab(ph){
+  if(ph==='verdict') return 'quiz';
+  if(ph==='summary'||ph==='done') return 'summary';
+  if(ph==='brief'||ph==='show') return ph;
+  return 'quiz';
 }
+/* 四拍随时可点开：peek 只是「看哪一块」，真实进度仍是 S.phase，互不干扰 */
+function stepsHtml(cur){
+  const real=phaseTab(cur), shown=S.peek||real;
+  const ri=PHASE_TABS.findIndex(t=>t[0]===real);
+  return '<div class="step-flow">'+PHASE_TABS.map(([k,n],i)=>
+    (i?'<span class="step-arrow">→</span>':'')+
+    '<button type="button" class="step '+(k===shown?'on':i<ri?'done':'')+(k===real?' real':'')+'" onclick="peekStage(\''+k+'\')" title="点开「'+n+'」回看，不会打断答题进度">'+n+(k===real?'<i class="step-now"></i>':'')+'</button>').join('')+
+    '<span class="step-tip">四拍都能点开回看 · 带小圆点的是当前进度</span></div>';
+}
+function peekStage(k){ S.peek = (S.peek===k || k===phaseTab(S.phase)) ? null : k; save(); render(); }
+function backToCurrent(){ S.peek=null; save(); render(); }
+function peekBar(shown, real){
+  return '<div class="peek-bar"><span>👀 正在回看「'+PHASE_NAME[shown]+'」· 当前进度停在「'+PHASE_NAME[real]+'」，答题状态没变</span>'+
+    '<button class="btn soft sm" onclick="backToCurrent()">↩ 回到当前进度</button></div>';
+}
+function backRow(){ return '<div class="btn-row"><button class="btn primary" onclick="backToCurrent()">↩ 回到当前进度</button></div>'; }
 function viewSetup(){
   return '<div class="card hero">'+
     '<div class="kicker">ANY TOPIC · ANYONE</div>'+
@@ -951,14 +1174,15 @@ function viewSetup(){
 }
 function opts(arr,cur){ return arr.map(x=>'<option '+(x===cur?'selected':'')+'>'+esc(x)+'</option>').join(''); }
 async function loadDemo(){
+  const keepCfg = S.settings;   // 看示例不该把填好的 Key / Skills / MCP 配置清掉
   S = Object.assign(blankState(), { topic:DEMO_TOPIC, engine:'demo', view:'learn', packsApproved:true,
     levels:JSON.parse(JSON.stringify(DEMO_LEVELS)), packs:JSON.parse(JSON.stringify(DEMO_PACKS)),
-    cur:0, qIndex:0, phase:'brief', glossary:[], records:[], weakPoints:[] });
+    cur:0, qIndex:0, phase:'brief', peek:null, glossary:[], records:[], weakPoints:[], settings:keepCfg });
   S.levels.forEach((l,i)=>l.status = i===0?'doing':'todo');
   save(); render(); toast('示例包已装载：'+DEMO_TOPIC);
 }
 function viewMap(){
-  if(!S.levels.length) return '<div class="card"><span class="loading"></span>正在拆关卡…</div>';
+  if(!S.levels.length) return '<div class="card"><div class="notice">正在生成关卡路线…看顶栏那条进度条，页面不会被盖住。</div></div>';
   return '<div class="card">'+
     '<div class="stage-head"><h2>🎯 目标：'+esc(S.topic)+'</h2><span class="pill info">'+S.levels.length+' 关 · '+(S.engine==='ai'?'AI 教练':'自练 / 示例')+'</span></div>'+
     '<p class="muted" style="margin-top:0">这条路线可以吗？有想跳过的关，或者想加进来的角度，改完再开始。</p>'+
@@ -966,6 +1190,7 @@ function viewMap(){
     S.levels.map((l,i)=>'<tr><td class="lvl-tag">'+esc(l.id)+'</td><td><b>'+esc(l.title)+'</b><div class="muted">'+esc(l.goal)+'</div></td><td class="muted">'+esc(l.form)+'</td></tr>').join('')+
     '</table>'+
     '<div class="btn-row"><button class="btn primary" onclick="startLevels()">这个路线行，开始 L1</button>'+
+    (S.engine==='ai'?'<button class="btn soft" onclick="pregenAll()">预生成全部关卡题目</button>':'')+
     '<button class="btn ghost" onclick="S.view=\'setup\';render()">换个主题 / 重新拆</button></div>'+
     '</div>'+
     '<div class="card"><h3>为什么这么拆</h3><div class="muted">由浅到深，前一关是后一关的前提，最后一关是综合场景或被连追三层。每关固定四拍：铺垫（≤150 字）→ 展示（表格 / 流程 / 步骤）→ 检验（一次一题）→ 结算（一句话 + 薄弱点）。</div></div>';
@@ -987,7 +1212,7 @@ function visualHtml(v){
   return '<div class="block visual"><div class="tag">② 展示 · '+(v.kind==='table'?'对照表':v.kind==='flow'?'流程 / 分叉':'步骤链路')+'</div>'+
     (v.title?'<div style="font-weight:700;margin-bottom:10px;font-size:14px">'+esc(v.title)+'</div>':'')+inner+'</div>';
 }
-function quizHtml(q, qn, qi){
+function quizHtml(q, qn, qi, readonly){
   const meta = '<div class="q-meta"><span class="pill info">'+esc(S.levels[S.cur].id)+' · 第 '+(qi+1)+'/'+qn+' 题</span><span class="pill">'+esc(TYPE_NAME[q.type]||'题目')+'</span>'+(S.difficulty>1?'<span class="pill warn">难度 '+'★'.repeat(S.difficulty)+'</span>':'')+'</div>';
   let body='';
   if(q.type==='choice' && q.options){
@@ -995,15 +1220,70 @@ function quizHtml(q, qn, qi){
   } else {
     body='<textarea id="answerInput" placeholder="'+(isOpen(q)?'写下你的思路，开放题不计对错，看推理链':'写下你的答案')+(q.type==='judge'?'（判断题记得写理由）':'')+'">'+esc(S._draft||'')+'</textarea>';
   }
+  const actions = readonly
+    ? '<button class="btn soft" onclick="backToCurrent()">↩ 回到当前进度再答</button>'
+    : '<button class="btn primary" onclick="submit()">交卷</button>'+
+      (isOpen(q)?'<span class="muted" style="align-self:center">开放题交卷后可以让 AI 按要点判，也可以自己判</span>':'');
   return '<div class="block quiz">'+meta+'<div class="q-stem">'+esc(q.stem)+'</div>'+body+
-    '<div class="btn-row"><button class="btn primary" onclick="submit()">交卷</button>'+
-    (isOpen(q)?'<span class="muted" style="align-self:center">开放题交卷后自己对照要点判</span>':'')+'</div></div>';
+    '<div class="btn-row">'+actions+'</div></div>';
+}
+const arr = v => Array.isArray(v) ? v.filter(x=>x!=null).map(String) : (v?[String(v)]:[]);
+const AI_JUDGE_RULES = [
+  '你是「开放题判卷教练」。只判这一道题，不出新题、不讲课、不闲聊。',
+  '判的是推理质量，不是有没有背出标准答案：说清「是什么 / 为什么 / 怎么推」算 ok；只给结论、链条断裂或明显少一步算 half；答非所问、空着或通篇复述题干算 no。',
+  '严格按题目给的判定要点逐条核对，用户没写的不要替他补；点评直接、写实，不夸奖、不写客套话，全程中文。',
+  '严格返回纯 JSON：{"verdict":"ok|half|no","score":0到100的整数,"comment":"两到三句点评","hits":["说到的要点"],"misses":["没说到或说错的"],"better":"一句话给出更好的答法"}'
+].join('\n');
+function aiJudgeHtml(a){
+  const lab={ok:'✅ 讲到了',half:'⚠️ 半懂',no:'❌ 没答上'}[a.verdict]||'⚠️ 半懂';
+  const cls=a.verdict==='ok'?'ok':a.verdict==='no'?'bad':'warn';
+  let s='<div class="aijudge"><div class="q-meta"><span class="pill info">AI 判定</span><span class="pill '+cls+'">'+lab+'</span>'+
+    (a.score!=null?'<span class="pill">'+esc(a.score)+' / 100</span>':'')+'</div>';
+  if(a.comment) s+='<div style="font-size:13.5px;line-height:1.75">'+esc(a.comment)+'</div>';
+  if(a.hits && a.hits.length) s+='<div class="ai-line"><b>说到的：</b>'+esc(a.hits.join('；'))+'</div>';
+  if(a.misses && a.misses.length) s+='<div class="ai-line"><b>缺的 / 说错的：</b>'+esc(a.misses.join('；'))+'</div>';
+  if(a.better) s+='<div class="ai-line"><b>更好的答法：</b>'+esc(a.better)+'</div>';
+  s+='<div class="btn-row"><button class="btn primary sm" onclick="adoptAiJudge()">采纳这个判定</button>'+
+     '<button class="btn ghost sm" onclick="aiJudge()">让 AI 再判一次</button></div></div>';
+  return s;
+}
+async function aiJudge(){
+  const v=S.verdict;
+  if(!v || v.mode!=='open'){ toast('先交卷，再让 AI 判'); return; }
+  if(!S.settings.key){ toast('先去「教练设置」填 API Key，才能用 AI 判卷'); openModal('maskSettings'); return; }
+  const q=v.q, ans=String(v.answer||'');
+  const user='主题：'+S.topic+'\n题干：'+q.stem+'\n参考答案：'+(q.answer||'（无标准答案，按要点判）')+
+    '\n判定要点：'+JSON.stringify(arr(q.rubric))+'\n用户答案：'+(ans||'（空）');
+  const btn=$('#btnAiJudge');
+  if(btn){ btn.disabled=true; btn.innerHTML='<span class="loading"></span>AI 判卷中'; }
+  try{
+    const out=await withGen(callLLM(AI_JUDGE_RULES,user,undefined,'mcp'),'AI 正在判这道开放题');
+    const vd=['ok','half','no'].includes(out.verdict)?out.verdict:(out.ok===true?'ok':out.ok===false?'no':'half');
+    const score=(typeof out.score==='number'&&isFinite(out.score))?Math.max(0,Math.min(100,Math.round(out.score))):null;
+    S.verdict=Object.assign({},S.verdict,{ai:{verdict:vd,score,comment:String(out.comment||''),hits:arr(out.hits),misses:arr(out.misses),better:String(out.better||''),judgedAt:new Date().toISOString()}});
+    save(); render(); toast('AI 判完了，采纳不采纳都由你定');
+  }catch(e){
+    toast(e.message==='NO_CFG'?'先去设置里填 API Key，才能用 AI 判卷':'AI 判卷没成：'+e.message);
+    render();
+  }finally{
+    const b=$('#btnAiJudge'); if(b){ b.disabled=false; b.textContent='🤖 让 AI 判这道题'; }
+  }
+}
+function adoptAiJudge(){
+  const v=S.verdict, a=v&&v.ai; if(!a) return;
+  const q=v.q, ans=String(v.answer||''), half=a.verdict==='half';
+  S.peek=null;
+  judge(a.verdict==='ok', ans||'（AI 判定：未作答）', q.answer||'', half?'half':'', q);
+  const r=S.records[S.records.length-1];
+  if(r){ r.judgeBy='ai'; r.aiComment=a.comment||''; if(a.score!=null) r.aiScore=a.score; }
+  S.verdict=Object.assign({},S.verdict,{ai:a});
+  save(); render(); toast('已采纳 AI 判定');
 }
 function verdictHtml(){
   const v=S.verdict; if(!v) return '';
   const q=v.q;
   const head = v.mode==='open'
-    ? '<span class="pill info">开放题 · 自己判</span>'
+    ? '<span class="pill info">开放题 · AI 判 / 自己判</span>'
     : (v.reveal?'<span class="pill warn">看了答案</span>'
       :v.selfLevel==='half'?'<span class="pill warn">⚠️ 半懂 · 算过，但退回 1 天</span>'
       :v.ok?'<span class="pill ok">✅ 对</span>':'<span class="pill bad">❌ 不对</span>');
@@ -1014,43 +1294,69 @@ function verdictHtml(){
   if(q.rubric && q.rubric.length) s+='<div style="font-weight:600;margin:12px 0 4px">判定要点</div><ul class="rubric">'+q.rubric.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul>';
   if(q.explain) s+='<div style="font-weight:600;margin:12px 0 4px">为什么</div><div style="font-size:13.5px">'+esc(q.explain)+'</div>';
   if(v.mode==='open'){
-    s+='<div class="divider"></div><div class="muted" style="margin-bottom:8px">对照上面三条要点，你自己判一下：</div><div class="btn-row" style="margin-top:0">'+
+    s+='<div class="divider"></div><div class="muted" style="margin-bottom:8px">开放题没有唯一答案。可以让模型按上面三条要点判，也可以自己判；AI 的结果只是建议。</div>'+
+      '<div class="btn-row" style="margin-top:0"><button class="btn soft sm" id="btnAiJudge" onclick="aiJudge()">🤖 让 AI 判这道题</button></div>';
+    if(v.ai) s+=aiJudgeHtml(v.ai);
+    s+='<div class="muted" style="margin:12px 0 8px">或者自己对照要点判：</div><div class="btn-row" style="margin-top:0">'+
       '<button class="btn soft sm" onclick="selfJudge(\'ok\')">讲到了 ✅</button>'+
       '<button class="btn ghost sm" onclick="selfJudge(\'half\')">半懂 ⚠️ 回退 1 天</button>'+
       '<button class="btn ghost sm" onclick="selfJudge(\'no\')">不会 ❌ 记薄弱点</button></div>';
   } else {
+    if(v.ai) s+='<div class="muted" style="margin-top:10px">AI 判定已采纳：'+esc((v.ai.comment||'').slice(0,90))+'</div>';
     s+='<div class="btn-row"><button class="btn primary" onclick="nextStep()">'+(S.qIndex+1<(curPack().questions||[]).length?'下一题':'本关结算')+'</button>'+
       (S.engine==='ai'?'<button class="btn ghost sm" onclick="rhythm(\'rephrase\')">换个说法再讲一遍</button>':'')+'</div>';
   }
   return s+'</div>';
 }
+function blockBrief(p){
+  return '<div class="block brief"><div class="tag">① 铺垫 · 先给直觉，再给定义</div><div style="font-size:14.5px;line-height:1.75">'+esc(p.brief)+'</div></div>';
+}
+function blockShow(p){
+  let s=visualHtml(p.visual);
+  if(p.glossary && p.glossary.length){
+    s+='<div class="block"><div class="tag">术语先行 · 这一段新词比较多，先看对照表</div><table class="glossary-table"><tr><th>缩写</th><th>中文全称</th><th>英文全称</th><th>一句话作用</th></tr>'+
+      p.glossary.map(g=>'<tr><td><code>'+esc(g.abbr)+'</code></td><td>'+esc(g.zh||'—')+'</td><td>'+esc(g.en||'—')+'</td><td>'+esc(g.desc||'—')+'</td></tr>').join('')+'</table></div>';
+  }
+  return s || '<div class="block visual"><div class="tag">② 展示</div><div class="muted">这一关没有额外的图表或对照表。</div></div>';
+}
+function blockSummary(lv,p,readonly){
+  const st=levelStat(lv.id);
+  const wrong=S.records.filter(r=>r.level===lv.id && r.correct===false);
+  let s='<div class="block brief"><div class="tag">④ 结算 · 一句话收口</div><div style="font-size:15px;font-weight:600">'+esc(p.summary||'这关过了。')+'</div></div>';
+  s+='<div class="block"><div class="tag">本关成绩（实时统计，回看也能看）</div><div class="kv"><span>答题数</span><b>'+st.n+' 题</b></div><div class="kv"><span>正确率</span><b>'+st.pct+'%</b></div><div class="kv"><span>待复习薄弱点</span><b>'+S.weakPoints.filter(w=>w.dueAt<=today()).length+' 条</b></div></div>';
+  if(p.practice) s+='<div class="block visual"><div class="tag">动手验证一下</div>'+esc(p.practice)+'</div>';
+  if(p.glossary && p.glossary.length) s+='<div class="block"><div class="tag">术语回扣 · 本关新词</div><table class="glossary-table"><tr><th>缩写</th><th>全称</th><th>作用</th></tr>'+p.glossary.map(g=>'<tr><td><code>'+esc(g.abbr)+'</code></td><td>'+esc(g.zh||g.en||'')+'</td><td>'+esc(g.desc||'')+'</td></tr>').join('')+'</table></div>';
+  if(wrong.length) s+='<div class="block"><div class="tag">记一下这几处</div>'+wrong.map(r=>'<div style="font-size:13px;padding:3px 0">· '+esc(r.point||'未命名考点')+' —— 你的答案：'+esc(String(r.userAnswer).slice(0,60))+'</div>').join('')+'</div>';
+  if(!readonly) s+='<div class="btn-row"><button class="btn primary" onclick="nextLevel()">'+(S.cur+1>=S.levels.length?'全部收官':'继续 '+S.levels[Math.min(S.cur+1,S.levels.length-1)].id)+'</button>'+
+      '<button class="btn ghost" onclick="S.qIndex=0;S.phase=\'brief\';S.peek=null;render()">把这关再过一遍</button></div>';
+  return s;
+}
 function viewLearn(){
   const lv=S.levels[S.cur], p=curPack(), qn=(p.questions||[]).length, q=curQ();
+  const real=phaseTab(S.phase), shown=S.peek||real;
   let s='<div class="card" style="padding:20px 22px">';
   s+='<div class="stage-head"><h2>'+esc(lv.id)+' · '+esc(lv.title)+'</h2><span class="pill '+(lv.status==='doing'?'warn':'ok')+'">'+esc(lv.goal)+'</span></div>';
   s+=stepsHtml(S.phase);
-  if(S.phase==='brief'||S.phase==='show'){
-    s+='<div class="block brief"><div class="tag">① 铺垫 · 先给直觉，再给定义</div><div style="font-size:14.5px;line-height:1.75">'+esc(p.brief)+'</div></div>';
-    s+=visualHtml(p.visual);
-    if(p.glossary && p.glossary.length){
-      s+='<div class="block"><div class="tag">术语先行 · 这一段新词比较多，先看对照表</div><table class="glossary-table"><tr><th>缩写</th><th>中文全称</th><th>英文全称</th><th>一句话作用</th></tr>'+
-        p.glossary.map(g=>'<tr><td><code>'+esc(g.abbr)+'</code></td><td>'+esc(g.zh||'—')+'</td><td>'+esc(g.en||'—')+'</td><td>'+esc(g.desc||'—')+'</td></tr>').join('')+'</table></div>';
+  if(S.peek && S.peek!==real) s+=peekBar(shown,real);
+
+  if(S.peek){
+    if(shown==='brief') s+=blockBrief(p)+backRow();
+    else if(shown==='show') s+=blockShow(p)+backRow();
+    else if(shown==='quiz'){
+      if(S.phase==='verdict') s+=verdictHtml();
+      else s+=(q?quizHtml(q,qn,S.qIndex,true):'<div class="notice">这一关还没有题目。</div>')+backRow();
     }
-    s+='<div class="btn-row"><button class="btn primary" onclick="S.phase=\'quiz\';render()">看明白了，开始答题</button></div>';
+    else s+=blockSummary(lv,p,true)+backRow();
+    return s+'</div>';
+  }
+
+  if(S.phase==='brief'||S.phase==='show'){
+    s+=blockBrief(p)+blockShow(p);
+    s+='<div class="btn-row"><button class="btn primary" onclick="S.phase=\'quiz\';S.peek=null;render()">看明白了，开始答题</button></div>';
   }
   if(S.phase==='quiz') s+= q ? quizHtml(q,qn,S.qIndex) : '<div class="notice">这一关没有题目，可以直接结算。</div><div class="btn-row"><button class="btn primary" onclick="nextStep()">本关结算</button></div>';
   if(S.phase==='verdict') s+=verdictHtml();
-  if(S.phase==='summary'){
-    const st=levelStat(lv.id);
-    const wrong=S.records.filter(r=>r.level===lv.id && r.correct===false);
-    s+='<div class="block brief"><div class="tag">④ 结算 · 一句话收口</div><div style="font-size:15px;font-weight:600">'+esc(p.summary||'这关过了。')+'</div></div>';
-    s+='<div class="block"><div class="tag">本关成绩</div><div class="kv"><span>答题数</span><b>'+st.n+' 题</b></div><div class="kv"><span>正确率</span><b>'+st.pct+'%</b></div><div class="kv"><span>待复习薄弱点</span><b>'+S.weakPoints.filter(w=>w.dueAt<=today()).length+' 条</b></div></div>';
-    if(p.practice) s+='<div class="block visual"><div class="tag">动手验证一下</div>'+esc(p.practice)+'</div>';
-    if(p.glossary && p.glossary.length) s+='<div class="block"><div class="tag">术语回扣 · 本关新词</div><table class="glossary-table"><tr><th>缩写</th><th>全称</th><th>作用</th></tr>'+p.glossary.map(g=>'<tr><td><code>'+esc(g.abbr)+'</code></td><td>'+esc(g.zh||g.en||'')+'</td><td>'+esc(g.desc||'')+'</td></tr>').join('')+'</table></div>';
-    if(wrong.length) s+='<div class="block"><div class="tag">记一下这几处</div>'+wrong.map(r=>'<div style="font-size:13px;padding:3px 0">· '+esc(r.point||'未命名考点')+' —— 你的答案：'+esc(String(r.userAnswer).slice(0,60))+'</div>').join('')+'</div>';
-    s+='<div class="btn-row"><button class="btn primary" onclick="nextLevel()">'+(S.cur+1>=S.levels.length?'全部收官':'继续 '+S.levels[Math.min(S.cur+1,S.levels.length-1)].id)+'</button>'+
-      '<button class="btn ghost" onclick="S.qIndex=0;S.phase=\'brief\';render()">把这关再过一遍</button></div>';
-  }
+  if(S.phase==='summary') s+=blockSummary(lv,p,false);
   return s+'</div>';
 }
 function viewDone(){
@@ -1087,7 +1393,7 @@ function writeArchives(list){
 }
 function snapshotState(){
   const st=JSON.parse(JSON.stringify(S));
-  delete st.settings; delete st._draft;                 // 密钥与临时草稿不进历史
+  delete st.settings; delete st._draft; delete st.peek; delete st._extTab;  // 密钥、草稿、UI 临时态不进历史
   st.type='state'; st.exportedAt=new Date().toISOString();
   return st;
 }
@@ -1132,7 +1438,7 @@ function restoreArchive(i){
   if(hasWork()) archiveCurrent();                      // 切走前先把当前也存好
   const keep=S.settings;
   S=Object.assign(blankState(), JSON.parse(JSON.stringify(a.state)));
-  S.settings=keep; delete S.type; delete S.exportedAt; delete S._draft;
+  S.settings=keep; delete S.type; delete S.exportedAt; delete S._draft; S.peek=null;
   save(); closeModal('maskHistory'); render();
   toast('已切回「'+S.topic+'」');
 }
@@ -1198,7 +1504,8 @@ function exportMd(){
 function exportJson(){
   if(!S.topic){ toast('还没有学习记录'); return; }
   const out = JSON.parse(JSON.stringify(S));
-  delete out.settings; // 密钥绝不写进导出文件
+  delete out.settings; // 密钥 / MCP Token 绝不写进导出文件
+  delete out.peek; delete out._extTab; delete out._draft;
   out.type='state'; out.exportedAt=new Date().toISOString();
   download(S.topic.replace(/[\\/:*?"<>|]/g,'_')+'-'+today()+'.json', JSON.stringify(out,null,2), 'application/json;charset=utf-8');
   toast('JSON 已导出（不含密钥）');
@@ -1223,11 +1530,11 @@ function doImport(){
   }
   if(d.type==='state' && d.levels){
     const keep = S.settings;
-    S=Object.assign(blankState(),d); S.settings=keep;
+    S=Object.assign(blankState(),d); S.settings=keep; S.peek=null;
     toast('已恢复「'+S.topic+'」的进度');
   } else if(d.levels && d.packs){
     S=Object.assign(blankState(),{topic:d.topic||'导入的学习包',engine:'local',levels:d.levels,packs:d.packs,view:'map',packsApproved:false,settings:S.settings});
-    S.levels.forEach(l=>l.status='todo');
+    S.levels.forEach(l=>l.status='todo'); S.peek=null;
     toast('学习包已导入，确认路线后开始');
   } else { toast('认不出来：需要导出的 state，或含 levels + packs 的学习包'); return; }
   save(); closeModal('maskImport'); render();
@@ -1235,15 +1542,93 @@ function doImport(){
 
 /* ---------- 事件绑定 ---------- */
 /* 配置填完即存：只 save() 不 render()，避免重建 DOM 打断输入、丢光标 */
-function applyCfg(){
+function applyCfg(full){
+  const keepExt=S.settings.ext;          // Skills / MCP 由专门的配置区管理，别被这里覆盖掉
   S.settings={
-    base:$('#cfgBase').value.trim(), model:$('#cfgModel').value.trim(), key:$('#cfgKey').value.trim(),
+    base:$('#cfgBase').value.trim(), model:$('#cfgModel').value.trim(),
+    key:$('#cfgKey').value.trim().replace(/^Bearer\s+/i,'').replace(/^["']|["']$/g,''),
     level:$('#cfgLevel').value, goal:$('#cfgGoal').value,
-    voiceRate:parseFloat($('#cfgVoiceRate').value)||1, voiceAuto:$('#cfgVoiceAuto').checked
+    voiceRate:parseFloat($('#cfgVoiceRate').value)||1, voiceAuto:$('#cfgVoiceAuto').checked,
+    ext:keepExt||blankExt()
   };
   S.startLevel=S.settings.level; S.goal=S.settings.goal;
-  save();
+  if(full === false) saveCfg();   // 按键瞬间：只写小配置，毫秒级完成，不重建 DOM
+  else save();                   // 顺带把整份学习状态写回去
   return S.settings;
+}
+function fillCfgForm(){
+  $('#cfgBase').value=S.settings.base||''; $('#cfgModel').value=S.settings.model||''; $('#cfgKey').value=S.settings.key||'';
+  $('#cfgLevel').value=S.settings.level||'有点印象'; $('#cfgGoal').value=S.settings.goal||'搞懂原理';
+  $('#cfgVoiceRate').value=String(S.settings.voiceRate||1); $('#cfgVoiceAuto').checked=!!S.settings.voiceAuto;
+}
+
+/* ---------- 能力扩展：用户自己增删改 Skills / MCP ---------- */
+function extSaved(){ const h=$('#cfgSavedHint'); if(h) h.textContent='✓ 已自动保存到这台设备（下次打开自动带出）'; }
+function switchExtTab(t){ S._extTab=t; renderExt(); }
+function extItemHtml(x,i,k){
+  let f='<label class="field"><span>名称</span><input type="text" value="'+esc(x.name)+'" oninput="editExt(\''+k+'\','+i+',\'name\',this.value)"></label>';
+  if(k==='skills'){
+    f+='<label class="field"><span>技能指令（写进系统提示词）</span><textarea oninput="editExt(\'skills\','+i+',\'prompt\',this.value)">'+esc(x.prompt)+'</textarea></label>';
+  }else{
+    f+='<label class="field"><span>端点 URL（远程 HTTP MCP 服务）</span><input type="text" value="'+esc(x.url)+'" placeholder="https://your-mcp.example.com/mcp" oninput="editExt(\'mcp\','+i+',\'url\',this.value)"></label>';
+    f+='<label class="field"><span>能力描述（这个源能查到什么，会写进提示词）</span><textarea oninput="editExt(\'mcp\','+i+',\'desc\',this.value)">'+esc(x.desc)+'</textarea></label>';
+    f+='<label class="field"><span>Token / 请求头（可选，只存本机，不进提示词与导出）</span><input type="password" value="'+esc(x.token)+'" oninput="editExt(\'mcp\','+i+',\'token\',this.value)"></label>';
+  }
+  return '<div class="ext-item"><div class="ext-head">'+
+    '<label class="voice-set" style="margin:0"><input type="checkbox" '+(x.enabled?'checked':'')+' onchange="toggleExt(\''+k+'\','+i+',this.checked)"><label>启用</label></label>'+
+    '<button class="btn ghost sm" onclick="delExt(\''+k+'\','+i+')">删除</button></div>'+f+'</div>';
+}
+function renderExt(){
+  const e=ext(), box=$('#extBox'); if(!box) return;
+  const k=S._extTab||'skills';
+  $('#tabSkill').classList.toggle('on',k==='skills'); $('#tabMcp').classList.toggle('on',k==='mcp');
+  const list=e[k]||[];
+  let html=list.length?list.map((x,i)=>extItemHtml(x,i,k)).join(''):'<div class="empty">还没有配置，点下面「＋ 添加」建一个</div>';
+  html+='<div class="btn-row" style="margin-top:8px"><button class="btn soft sm" onclick="addExt(\''+k+'\')">＋ 添加'+(k==='skills'?'技能':'知识源')+'</button></div>';
+  if(k==='skills') html+='<label class="voice-set"><input type="checkbox" id="extInjectSkills" '+(e.injectSkills!==false?'checked':'')+' onchange="toggleInject(\'injectSkills\',this.checked)"><label for="extInjectSkills">把启用的技能注入系统提示词</label></label>';
+  else html+='<label class="voice-set"><input type="checkbox" id="extInjectMcp" '+(e.injectMcp!==false?'checked':'')+' onchange="toggleInject(\'injectMcp\',this.checked)"><label for="extInjectMcp">把启用的知识源注入系统提示词</label></label>';
+  box.innerHTML=html;
+}
+function editExt(k,i,f,v){ const a=ext()[k][i]; if(a){ a[f]=v; save(); extSaved(); } }
+function toggleExt(k,i,v){ const a=ext()[k][i]; if(a){ a.enabled=v; save(); extSaved(); } }
+function addExt(k){ const e=ext(); e[k].push(k==='skills'?{id:uid(),name:'新技能',prompt:'',enabled:true}:{id:uid(),name:'新知识源',url:'',desc:'',token:'',enabled:true}); save(); renderExt(); extSaved(); }
+function delExt(k,i){ if(!confirm('删掉这一条？')) return; ext()[k].splice(i,1); save(); renderExt(); extSaved(); }
+function toggleInject(f,v){ ext()[f]=v; save(); extSaved(); }
+function resetExtCfg(){ if(!confirm('恢复内置技能模板？自定义的 Skills 会被替换，MCP 配置保留。')) return; ext().skills=JSON.parse(JSON.stringify(BUILTIN_SKILLS)); save(); renderExt(); extSaved(); toast('已恢复内置技能模板'); }
+function previewPrompt(){ $('#promptPreview').value=fullSystem(COACH_RULES)+'\n\n── 以上是每次生成 / 判卷时发送的 system 消息；API Key 与 MCP Token 都不在其中。'; openModal('maskPrompt'); }
+function exportExtCfg(){
+  const e=ext();
+  const out={type:'coach-ext',exportedAt:new Date().toISOString(),skills:e.skills,
+    mcp:(e.mcp||[]).map(x=>({id:x.id,name:x.name,url:x.url,desc:x.desc,enabled:x.enabled}))};
+  download('能力配置-'+today()+'.json',JSON.stringify(out,null,2),'application/json;charset=utf-8');
+  toast('已导出（不含任何密钥 / Token）');
+}
+function importExtCfg(){
+  const box=$('#extImportText'); box.style.display='block';
+  const raw=box.value.trim();
+  if(!raw){ toast('把配置 JSON 粘到下面的框里，再点一次「导入配置」'); return; }
+  let d; try{ d=JSON.parse(raw); }catch(e){ toast('JSON 解析失败：'+e.message); return; }
+  if(!d || (!Array.isArray(d.skills) && !Array.isArray(d.mcp))){ toast('认不出来：需要含 skills / mcp 的配置'); return; }
+  const e=ext();
+  if(Array.isArray(d.skills)) e.skills=d.skills.map(x=>({id:x.id||uid(),name:x.name||'技能',prompt:x.prompt||'',enabled:x.enabled!==false}));
+  if(Array.isArray(d.mcp)) e.mcp=d.mcp.map(x=>({id:x.id||uid(),name:x.name||'知识源',url:x.url||'',desc:x.desc||'',token:'',enabled:x.enabled!==false}));
+  save(); box.value=''; box.style.display='none'; renderExt(); extSaved(); toast('能力配置已导入');
+}
+/* ---------- 连接诊断：把「没通」变成能看懂的原因 ---------- */
+let lastTest='';
+function renderDiag(){
+  const box=$('#cfgDiag'); if(!box) return;
+  const s=S.settings||{}, k=s.key||'';
+  const host=location.host||'(本地文件)';
+  const how=location.protocol==='file:'?'本地文件直接打开':(location.protocol==='https:'?'线上 https':'本地 http');
+  const kShow=k?(esc(k.slice(0,7))+'…'+esc(k.slice(-4))+'（'+k.length+' 位）'):'<b style="color:#e05">未填</b>';
+  box.innerHTML='<b>连接诊断</b><br>'+
+    '打开方式：<code>'+esc(location.protocol+'//'+host)+'</code>（'+how+'）<br>'+
+    '将请求：<code>'+esc((s.base||'未填').replace(/\/+$/,'')+'/chat/completions')+'</code><br>'+
+    '模型：<code>'+esc(s.model||'未填')+'</code> ｜ Key：'+kShow+'<br>'+
+    '配置：'+(cfgWriteWarned?'<b>⚠ 写入失败，刷新可能丢</b>':'✓ 已独立保存，刷新 / 换主题 / 清空学习数据都不丢')+'<br>'+
+    (lastTest?('上次结果：'+esc(lastTest)):'点「测一下连通」看结果')+
+    '<br><span class="muted">若提示「浏览器没能发出请求」，多是内置预览面板的安全策略拦截，请改用普通浏览器标签打开。</span>';
 }
 let cfgTimer=null;
 function scheduleCfgSave(){
@@ -1251,20 +1636,43 @@ function scheduleCfgSave(){
   const hint=$('#cfgSavedHint');
   if(hint) hint.textContent='正在保存…';
   cfgTimer=setTimeout(()=>{
-    applyCfg();
+    applyCfg(); renderDiag();
     if(hint) hint.textContent='✓ 已自动保存到这台设备（下次打开自动带出）';
   }, 400);
 }
+function onCfgInput(){
+  applyCfg(false);      // 先立刻落盘，填完就按 F5 也不会丢
+  scheduleCfgSave();    // 400ms 后补写整份学习状态、刷新提示
+}
 ['cfgBase','cfgModel','cfgKey','cfgLevel','cfgGoal','cfgVoiceRate','cfgVoiceAuto'].forEach(id=>{
   const el=$('#'+id);
-  el.addEventListener('input', scheduleCfgSave);
-  el.addEventListener('change', scheduleCfgSave);
+  el.addEventListener('input', onCfgInput);
+  el.addEventListener('change', onCfgInput);
+});
+/* 刷新 / 切后台前把挂起的补写收尾。按键时配置已单独落盘，
+   这里只在确实有未跑完的定时器时才写盘，避免用旧内存值覆盖外部更新或老存档迁移 */
+function flushCfg(){ if(!cfgTimer) return; clearTimeout(cfgTimer); cfgTimer=null; save(); }
+window.addEventListener('pagehide', flushCfg);
+window.addEventListener('beforeunload', flushCfg);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') flushCfg(); });
+/* 多标签同步：别的标签改了配置，本页不拿旧值覆盖回去 */
+window.addEventListener('storage', e=>{
+  if(e.key !== CFG_KEY || !e.newValue) return;
+  try{
+    S.settings = mergeSettings(JSON.parse(e.newValue));
+    S.startLevel=S.settings.level; S.goal=S.settings.goal;
+    const mask=$('#maskSettings');
+    if(mask && mask.classList.contains('show')){
+      const active=document.activeElement;
+      if(!active || !mask.contains(active)){ fillCfgForm(); renderExt(); }
+      renderDiag();
+    }
+  }catch(err){}
 });
 $('#btnSettings').onclick=()=>{
-  $('#cfgBase').value=S.settings.base; $('#cfgModel').value=S.settings.model; $('#cfgKey').value=S.settings.key;
-  $('#cfgLevel').value=S.settings.level; $('#cfgGoal').value=S.settings.goal;
-  $('#cfgVoiceRate').value=String(S.settings.voiceRate||1); $('#cfgVoiceAuto').checked=!!S.settings.voiceAuto;
-  $('#cfgSavedHint').textContent='改动会自动保存，下次打开自动带出';
+  fillCfgForm();
+  $('#cfgSavedHint').textContent='改动会自动保存，刷新也不会丢';
+  S._extTab=S._extTab||'skills'; renderExt(); renderDiag();
   updateVoiceButtons();
   openModal('maskSettings');
 };
@@ -1275,20 +1683,31 @@ $('#btnSaveCfg').onclick=()=>{
 $('#btnTestCfg').onclick=async()=>{
   clearTimeout(cfgTimer);
   const cfg=applyCfg();                       // 先落盘，测的就是保存后的配置
-  if(!cfg.base||!cfg.model||!cfg.key){ toast('三个都填一下再测'); return; }
+  renderDiag();
+  if(!cfg.base||!cfg.model||!cfg.key){ lastTest='⚠ 三栏没填全'; renderDiag(); toast('三个都填一下再测'); return; }
   const btn=$('#btnTestCfg'); btn.innerHTML='<span class="loading"></span>测试中'; btn.disabled=true;
   const hint=$('#cfgSavedHint');
+  if(hint) hint.textContent='正在请求 '+cfg.base.replace(/\/+$/,'')+'/chat/completions …';
+  const t0=Date.now();
   try{
-    await callLLM('你是一个测试接口。只返回纯 JSON。','返回 {"ok":true}');
-    if(hint) hint.textContent='✓ 连通正常，配置已保存';
+    await callLLM('你是一个测试接口。只返回纯 JSON。','返回 {"ok":true}',undefined,true);
+    lastTest='✓ 连通正常 · 模型 '+cfg.model+' · '+(Date.now()-t0)+'ms · 配置已保存';
+    if(hint) hint.textContent=lastTest;
     toast('连通正常，配置已保存');
   }catch(e){
-    if(hint) hint.textContent='⚠ 没连通；配置已保存，可直接修改重试';
-    toast('没通：'+e.message);
-  }finally{ btn.textContent='测一下连通'; btn.disabled=false; }
+    lastTest='⚠ '+e.message;
+    if(hint) hint.textContent=lastTest;
+    toast('没通：'+e.message.slice(0,90));
+    console.error('[连通测试失败]', e);
+  }finally{ renderDiag(); btn.textContent='测一下连通'; btn.disabled=false; }
 };
 $('#btnTheme').onclick=()=>{ const d=document.body.getAttribute('data-theme')==='dark'; document.body.setAttribute('data-theme',d?'light':'dark'); localStorage.setItem(LS+'-theme',d?'light':'dark'); };
 $('#progressLine').onclick=openProgress;
+$('#genClose').onclick=()=>{ clearTimeout(genHideTimer); genHide(); };
+$('#btnPreviewPrompt').onclick=previewPrompt;
+$('#btnExportExt').onclick=exportExtCfg;
+$('#btnImportExt').onclick=importExtCfg;
+$('#btnResetExt').onclick=resetExtCfg;
 $('#btnSpeak').onclick=toggleSpeak;
 $('#btnDictate').onclick=startDictation;
 $('#btnNew').onclick=startNewTopic;
