@@ -1646,9 +1646,9 @@ function visualLabel(v){ return VISUAL_NAMES[visualKind(v)]||'图解'; }
 function svgWrap(inner, vb, maxH){
   const w = parseInt(String(vb).split(/\s+/)[2], 10) || 600;
   if(w > 640){
-    return '<div style="overflow-x:auto;overflow-y:hidden"><svg viewBox="'+vb+'" style="display:block;height:auto;max-height:'+(maxH||340)+'px;width:'+w+'px" preserveAspectRatio="xMidYMid meet" role="img">'+inner+'</svg></div>';
+    return '<div style="overflow-x:auto;overflow-y:hidden;padding-bottom:4px"><svg viewBox="'+vb+'" style="display:block;height:auto;width:'+w+'px" preserveAspectRatio="xMidYMid meet" role="img">'+inner+'</svg></div>';
   }
-  return '<svg viewBox="'+vb+'" width="100%" style="display:block;height:auto;max-height:'+(maxH||340)+'px" preserveAspectRatio="xMidYMid meet" role="img">'+inner+'</svg>';
+  return '<svg viewBox="'+vb+'" width="100%" style="display:block;height:auto;max-height:'+(maxH||520)+'px" preserveAspectRatio="xMidYMid meet" role="img">'+inner+'</svg>';
 }
 function visualNotes(v){
   if(!v || !Array.isArray(v.notes) || !v.notes.length) return '';
@@ -1668,11 +1668,11 @@ function visualFlow(v){
   if(!Array.isArray(v.nodes) || !v.nodes.length) return '';
   const chains=v.nodes.map(n=>Array.isArray(n)?n:[n]);
   const colW = chains.length > 3 ? '150px' : '190px';
-  return '<div style="overflow-x:auto;padding-bottom:4px"><div style="display:flex;gap:12px;min-width:max-content">'+
+  return '<div style="overflow-x:auto;padding-bottom:4px"><div style="display:flex;gap:18px;min-width:max-content">'+
     chains.map(chain=>
       '<div style="flex:0 0 '+colW+';max-width:300px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 13px;display:flex;flex-direction:column">'+
         chain.map((n,j)=>
-          '<div style="font-size:13px;line-height:1.6;word-break:break-word;padding:8px 11px;background:var(--bg);border:1px solid var(--line-soft);border-radius:8px">'+esc(n)+'</div>'+
+          '<div title="'+esc(n)+'" style="font-size:13px;line-height:1.6;word-break:break-word;padding:8px 11px;background:var(--bg);border:1px solid var(--line-soft);border-radius:8px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">'+esc(n)+'</div>'+
           (j<chain.length-1?'<div style="text-align:center;color:var(--ink-3);font-size:13px;line-height:1.4;padding:2px 0">↓</div>':'')
         ).join('')+
       '</div>').join('')+
@@ -1686,30 +1686,34 @@ function visualSequence(v){
   events.forEach(e=>{ [e.from,e.to].forEach(a=>{ a=String(a); if(actors.indexOf(a)<0) actors.push(a); }); });
   actors=actors.slice(0,6);
   if(actors.length<2) return '';
-  const W=Math.max(420, actors.length*160), top=56, step=54, H=top+events.length*step+24;
+  const W=Math.max(460, actors.length*200), top=60, step=66, H=top+events.length*step+28;
   const xOf=a=>{ const i=Math.max(0,actors.indexOf(String(a))); return 34 + i*((W-68)/Math.max(1,actors.length-1)); };
   let s='';
   actors.forEach(a=>{
     const cx=xOf(a);
     const aName=String(a), aCut=aName.length>9?aName.slice(0,9)+'…':aName;
-    s+='<rect x="'+(cx-66)+'" y="10" width="132" height="28" rx="8" fill="var(--card)" stroke="var(--line)"/>'+
-       '<text x="'+cx+'" y="29" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">'+esc(aCut)+'<title>'+esc(aName)+'</title></text>'+
+    s+='<rect x="'+(cx-75)+'" y="10" width="150" height="30" rx="8" fill="var(--card)" stroke="var(--line)"/>'+
+       '<text x="'+cx+'" y="31" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--ink)">'+esc(aCut)+'<title>'+esc(aName)+'</title></text>'+
        '<line x1="'+cx+'" y1="38" x2="'+cx+'" y2="'+(H-12)+'" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="4 4"/>';
   });
   events.forEach((e,j)=>{
     const y=top+j*step, x1=xOf(e.from), x2=xOf(e.to);
-    const text=String(e.text||''), cut=text.length>22?text.slice(0,22)+'…':text;
+    const text=String(e.text||''), cut=text.length>18?text.slice(0,18)+'…':text;
+    const lines=[]; for(let i=0;i<cut.length;i+=9) lines.push(cut.slice(i,i+9));
     if(x1===x2){
       s+='<path d="M '+x1+' '+y+' h 48 v 18 h -48" fill="none" stroke="var(--blue)" stroke-width="1.6"/>'+
          '<polygon points="'+x1+','+(y+18)+' '+(x1-4)+','+(y+13)+' '+(x1+4)+','+(y+13)+'" fill="var(--blue)"/>'+
-         '<text x="'+(x1+54)+'" y="'+(y+5)+'" font-size="11" fill="var(--ink-2)">'+esc(cut)+'<title>'+esc(text)+'</title></text>'+
-         (e.note?'<text x="'+(x1+54)+'" y="'+(y+20)+'" font-size="10" fill="var(--ink-3)">'+esc(String(e.note).slice(0,24))+'</text>':'');
+         '<text x="'+(x1+54)+'" y="'+(y+5)+'" font-size="11" fill="var(--ink-2)">'+esc(lines[0]||'')+'<title>'+esc(text)+'</title></text>'+
+         (e.note?'<text x="'+(x1+54)+'" y="'+(y+20)+'" font-size="10" fill="var(--ink-3)">'+esc(String(e.note).slice(0,20))+'</text>':'');
     } else {
       const dir=x2>x1?1:-1;
+      const tx=(x1+x2)/2;
       s+='<line x1="'+x1+'" y1="'+y+'" x2="'+(x2-dir*4)+'" y2="'+y+'" stroke="var(--blue)" stroke-width="1.6"/>'+
          '<polygon points="'+x2+','+y+' '+(x2-dir*9)+','+(y-4)+' '+(x2-dir*9)+','+(y+4)+'" fill="var(--blue)"/>'+
-         '<text x="'+((x1+x2)/2)+'" y="'+(y-7)+'" text-anchor="middle" font-size="11" fill="var(--ink-2)">'+esc(cut)+'<title>'+esc(text)+'</title></text>'+
-         (e.note?'<text x="'+((x1+x2)/2)+'" y="'+(y+14)+'" text-anchor="middle" font-size="10" fill="var(--ink-3)">'+esc(String(e.note).slice(0,24))+'</text>':'');
+         '<text x="'+tx+'" y="'+(y+15)+'" text-anchor="middle" font-size="11" fill="var(--ink-2)">'+
+           lines.map((ln,i)=>'<tspan x="'+tx+'" dy="'+(i?14:0)+'">'+esc(ln)+'</tspan>').join('')+
+           '<title>'+esc(text)+'</title></text>'+
+         (e.note?'<text x="'+tx+'" y="'+(y+15+lines.length*14)+'" text-anchor="middle" font-size="10" fill="var(--ink-3)">'+esc(String(e.note).slice(0,20))+'</text>':'');
     }
   });
   return svgWrap(s,'0 0 '+W+' '+H);
@@ -1739,23 +1743,30 @@ function visualGraph(v){
   const FS=13, LINE_H=19, PAD_X=12, PAD_Y=8, MAX_BOX_W=200, MIN_BOX_W=56;
   const chW = ch => /[\x00-\xff]/.test(ch) ? FS*0.58 : FS;
   const tw = s => { let w=0; for(const ch of s) w+=chW(ch); return w; };
-  function wrap(s, maxW){
+  function wrap(s, maxW, maxLines){
+    maxLines = maxLines || 3;
     const lines=[]; let cur='';
     for(const ch of s){
-      if(cur && tw(cur+ch)>maxW){ lines.push(cur); cur=ch; }
+      if(cur && tw(cur+ch)>maxW){
+        lines.push(cur);
+        if(lines.length>=maxLines) break;
+        cur=ch;
+      }
       else cur+=ch;
     }
-    if(cur) lines.push(cur);
+    if(lines.length<maxLines && cur) lines.push(cur);
     return lines.length?lines:[''];
   }
   nodes.forEach(n=>{
-    n.lines=wrap(n.label, MAX_BOX_W-PAD_X*2);
+    n.lines=wrap(n.label, MAX_BOX_W-PAD_X*2, 3);
+    const shown=n.lines.join('');
+    if(shown.length < n.label.length) n.lines[n.lines.length-1]+='…';
     n.w=Math.round(Math.max(MIN_BOX_W, Math.min(MAX_BOX_W, Math.max.apply(null, n.lines.map(tw))+PAD_X*2)));
     n.h=Math.round(n.lines.length*LINE_H+PAD_Y*2);
   });
   const cols={}; nodes.forEach(n=>{ const d=depth[n.id]||0; (cols[d]=cols[d]||[]).push(n); });
   const colKeys=Object.keys(cols).sort((a,b)=>a-b);
-  const COL_GAP=48, ROW_GAP=16, MX=14, MY=14;
+  const COL_GAP=88, ROW_GAP=22, MX=16, MY=16;
   const colW={}; colKeys.forEach(d=>{ colW[d]=Math.max.apply(null, cols[d].map(n=>n.w)); });
   const colX={}; let x=MX;
   colKeys.forEach(d=>{ colX[d]=x; x+=colW[d]+COL_GAP; });
