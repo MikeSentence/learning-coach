@@ -1644,6 +1644,10 @@ const VISUAL_NAMES = {
 function visualKind(v){ return String((v&&v.kind)||'').toLowerCase(); }
 function visualLabel(v){ return VISUAL_NAMES[visualKind(v)]||'图解'; }
 function svgWrap(inner, vb, maxH){
+  const w = parseInt(String(vb).split(/\s+/)[2], 10) || 600;
+  if(w > 640){
+    return '<div style="overflow-x:auto;overflow-y:hidden"><svg viewBox="'+vb+'" style="display:block;height:auto;max-height:'+(maxH||340)+'px;width:'+w+'px" preserveAspectRatio="xMidYMid meet" role="img">'+inner+'</svg></div>';
+  }
   return '<svg viewBox="'+vb+'" width="100%" style="display:block;height:auto;max-height:'+(maxH||340)+'px" preserveAspectRatio="xMidYMid meet" role="img">'+inner+'</svg>';
 }
 function visualNotes(v){
@@ -1662,9 +1666,17 @@ function visualSteps(v){
 }
 function visualFlow(v){
   if(!Array.isArray(v.nodes) || !v.nodes.length) return '';
-  const nodes=v.nodes.map(n=>Array.isArray(n)?n:[n]);
-  return '<div style="display:flex;align-items:stretch;gap:6px;flex-wrap:wrap">'+nodes.map(chain=>
-    '<div style="flex:1;min-width:130px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 11px">'+chain.map((n,j)=>'<div style="font-size:12px;padding:2px 0">'+(j?'↓ ':'')+esc(n)+'</div>').join('')+'</div>').join('')+'</div>';
+  const chains=v.nodes.map(n=>Array.isArray(n)?n:[n]);
+  const colW = chains.length > 3 ? '150px' : '190px';
+  return '<div style="overflow-x:auto;padding-bottom:4px"><div style="display:flex;gap:12px;min-width:max-content">'+
+    chains.map(chain=>
+      '<div style="flex:0 0 '+colW+';max-width:300px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 13px;display:flex;flex-direction:column">'+
+        chain.map((n,j)=>
+          '<div style="font-size:13px;line-height:1.6;word-break:break-word;padding:8px 11px;background:var(--bg);border:1px solid var(--line-soft);border-radius:8px">'+esc(n)+'</div>'+
+          (j<chain.length-1?'<div style="text-align:center;color:var(--ink-3);font-size:13px;line-height:1.4;padding:2px 0">↓</div>':'')
+        ).join('')+
+      '</div>').join('')+
+    '</div></div>';
 }
 function visualSequence(v){
   const rawEvents=(Array.isArray(v.events)?v.events:Array.isArray(v.messages)?v.messages:[]);
@@ -1679,24 +1691,25 @@ function visualSequence(v){
   let s='';
   actors.forEach(a=>{
     const cx=xOf(a);
-    s+='<rect x="'+(cx-56)+'" y="10" width="112" height="28" rx="8" fill="var(--card)" stroke="var(--line)"/>'+
-       '<text x="'+cx+'" y="29" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">'+esc(a)+'</text>'+
-       '<line x1="'+cx+'" y1="38" x2="'+cx+'" y2="'+(H-12)+'" stroke="var(--line)" stroke-dasharray="4 4"/>';
+    const aName=String(a), aCut=aName.length>9?aName.slice(0,9)+'…':aName;
+    s+='<rect x="'+(cx-66)+'" y="10" width="132" height="28" rx="8" fill="var(--card)" stroke="var(--line)"/>'+
+       '<text x="'+cx+'" y="29" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">'+esc(aCut)+'<title>'+esc(aName)+'</title></text>'+
+       '<line x1="'+cx+'" y1="38" x2="'+cx+'" y2="'+(H-12)+'" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="4 4"/>';
   });
   events.forEach((e,j)=>{
     const y=top+j*step, x1=xOf(e.from), x2=xOf(e.to);
-    const text=String(e.text||''), cut=text.length>18?text.slice(0,18)+'…':text;
+    const text=String(e.text||''), cut=text.length>22?text.slice(0,22)+'…':text;
     if(x1===x2){
       s+='<path d="M '+x1+' '+y+' h 48 v 18 h -48" fill="none" stroke="var(--blue)" stroke-width="1.6"/>'+
          '<polygon points="'+x1+','+(y+18)+' '+(x1-4)+','+(y+13)+' '+(x1+4)+','+(y+13)+'" fill="var(--blue)"/>'+
          '<text x="'+(x1+54)+'" y="'+(y+5)+'" font-size="11" fill="var(--ink-2)">'+esc(cut)+'<title>'+esc(text)+'</title></text>'+
-         (e.note?'<text x="'+(x1+54)+'" y="'+(y+20)+'" font-size="10" fill="var(--ink-3)">'+esc(String(e.note).slice(0,18))+'</text>':'');
+         (e.note?'<text x="'+(x1+54)+'" y="'+(y+20)+'" font-size="10" fill="var(--ink-3)">'+esc(String(e.note).slice(0,24))+'</text>':'');
     } else {
       const dir=x2>x1?1:-1;
       s+='<line x1="'+x1+'" y1="'+y+'" x2="'+(x2-dir*4)+'" y2="'+y+'" stroke="var(--blue)" stroke-width="1.6"/>'+
          '<polygon points="'+x2+','+y+' '+(x2-dir*9)+','+(y-4)+' '+(x2-dir*9)+','+(y+4)+'" fill="var(--blue)"/>'+
          '<text x="'+((x1+x2)/2)+'" y="'+(y-7)+'" text-anchor="middle" font-size="11" fill="var(--ink-2)">'+esc(cut)+'<title>'+esc(text)+'</title></text>'+
-         (e.note?'<text x="'+((x1+x2)/2)+'" y="'+(y+14)+'" text-anchor="middle" font-size="10" fill="var(--ink-3)">'+esc(String(e.note).slice(0,20))+'</text>':'');
+         (e.note?'<text x="'+((x1+x2)/2)+'" y="'+(y+14)+'" text-anchor="middle" font-size="10" fill="var(--ink-3)">'+esc(String(e.note).slice(0,24))+'</text>':'');
     }
   });
   return svgWrap(s,'0 0 '+W+' '+H);
@@ -1710,6 +1723,7 @@ function visualGraph(v){
     .filter(e=>e && e[0]!=null && e[1]!=null)
     .map(e=>({from:String(e[0]),to:String(e[1]),label:e[2]!=null?String(e[2]):''}))
     .filter(e=>ids[e.from]&&ids[e.to]);
+  // 分层（BFS 拓扑序）
   const adj={}, indeg={};
   nodes.forEach(n=>{ adj[n.id]=[]; indeg[n.id]=0; });
   edges.forEach(e=>{ adj[e.from].push(e.to); indeg[e.to]=(indeg[e.to]||0)+1; });
@@ -1720,39 +1734,61 @@ function visualGraph(v){
     const a=queue.shift();
     (adj[a]||[]).forEach(b=>{ if(depth[b]==null){ depth[b]=(depth[a]||0)+1; queue.push(b); } });
   }
-  let maxD=0;
-  nodes.forEach(n=>{ if(depth[n.id]==null) depth[n.id]=0; maxD=Math.max(maxD,depth[n.id]); });
-  const cols={}; nodes.forEach(n=>{ const d=depth[n.id]||0; (cols[d]=cols[d]||[]).push(n); });
-  const dx=178, boxW=148, boxH=34, gapY=18, mx=16, my=16;
-  const colKeys=Object.keys(cols).sort((a,b)=>a-b);
-  const maxRows=Math.max.apply(null, colKeys.map(d=>cols[d].length));
-  const W=mx*2+dx*(colKeys.length-1)+boxW, H=Math.max(160, my*2+maxRows*(boxH+gapY));
-  const pos={};
-  colKeys.forEach((d,ci)=>{
-    const list=cols[d], step=(H-my*2)/list.length;
-    list.forEach((n,ri)=>{ pos[n.id]={x:mx+ci*dx, y:my+step*ri+(step-boxH)/2, w:boxW, h:boxH}; });
+  nodes.forEach(n=>{ if(depth[n.id]==null) depth[n.id]=0; });
+  // 文字宽度估算：全角≈字号，半角≈字号*0.58；节点内换行，不截断
+  const FS=13, LINE_H=19, PAD_X=12, PAD_Y=8, MAX_BOX_W=200, MIN_BOX_W=56;
+  const chW = ch => /[\x00-\xff]/.test(ch) ? FS*0.58 : FS;
+  const tw = s => { let w=0; for(const ch of s) w+=chW(ch); return w; };
+  function wrap(s, maxW){
+    const lines=[]; let cur='';
+    for(const ch of s){
+      if(cur && tw(cur+ch)>maxW){ lines.push(cur); cur=ch; }
+      else cur+=ch;
+    }
+    if(cur) lines.push(cur);
+    return lines.length?lines:[''];
+  }
+  nodes.forEach(n=>{
+    n.lines=wrap(n.label, MAX_BOX_W-PAD_X*2);
+    n.w=Math.round(Math.max(MIN_BOX_W, Math.min(MAX_BOX_W, Math.max.apply(null, n.lines.map(tw))+PAD_X*2)));
+    n.h=Math.round(n.lines.length*LINE_H+PAD_Y*2);
   });
+  const cols={}; nodes.forEach(n=>{ const d=depth[n.id]||0; (cols[d]=cols[d]||[]).push(n); });
+  const colKeys=Object.keys(cols).sort((a,b)=>a-b);
+  const COL_GAP=48, ROW_GAP=16, MX=14, MY=14;
+  const colW={}; colKeys.forEach(d=>{ colW[d]=Math.max.apply(null, cols[d].map(n=>n.w)); });
+  const colX={}; let x=MX;
+  colKeys.forEach(d=>{ colX[d]=x; x+=colW[d]+COL_GAP; });
+  const W=Math.round(x-COL_GAP+MX);
+  const pos={};
+  colKeys.forEach(d=>{
+    const list=cols[d];
+    let y=MY;
+    list.forEach(n=>{ pos[n.id]={x:colX[d], y, w:n.w, h:n.h}; y+=n.h+ROW_GAP; });
+  });
+  let maxBottom=MY; nodes.forEach(n=>{ const p=pos[n.id]; maxBottom=Math.max(maxBottom, p.y+p.h); });
+  const H=Math.round(maxBottom+MY);
   let s='';
   edges.forEach(e=>{
     const a=pos[e.from], b=pos[e.to];
     if(!a||!b) return;
     if(b.x>=a.x){
       const x1=a.x+a.w, y1=a.y+a.h/2, x2=b.x, y2=b.y+b.h/2, mid=(x1+x2)/2;
-      s+='<path d="M '+x1+' '+y1+' C '+mid+' '+y1+', '+mid+' '+y2+', '+x2+' '+y2+'" fill="none" stroke="var(--line)" stroke-width="1.4"/>'+
-         '<polygon points="'+x2+','+y2+' '+(x2-7)+','+(y2-4)+' '+(x2-7)+','+(y2+4)+'" fill="var(--line)"/>'+
-         (e.label?'<text x="'+mid+'" y="'+(((y1+y2)/2)-5)+'" text-anchor="middle" font-size="10" fill="var(--ink-3)">'+esc(e.label)+'</text>':'');
+      s+='<path d="M '+x1+' '+y1+' C '+mid+' '+y1+', '+mid+' '+y2+', '+x2+' '+y2+'" fill="none" stroke="var(--ink-3)" stroke-width="1.4"/>'+
+         '<polygon points="'+x2+','+y2+' '+(x2-7)+','+(y2-4)+' '+(x2-7)+','+(y2+4)+'" fill="var(--ink-3)"/>'+
+         (e.label?'<text x="'+mid+'" y="'+(((y1+y2)/2)-5)+'" text-anchor="middle" font-size="11" fill="var(--ink-3)">'+esc(e.label)+'</text>':'');
     } else {
-      const x1=a.x+a.w/2, y1=a.y, x2=b.x+b.w/2, y2=b.y, midY=Math.max(8,Math.min(y1,y2)-16);
-      s+='<path d="M '+x1+' '+y1+' C '+x1+' '+midY+', '+x2+' '+midY+', '+x2+' '+y2+'" fill="none" stroke="var(--line)" stroke-width="1.4" stroke-dasharray="4 4"/>'+
-         (e.label?'<text x="'+((x1+x2)/2)+'" y="'+(midY-4)+'" text-anchor="middle" font-size="10" fill="var(--ink-3)">'+esc(e.label)+'</text>':'');
+      const x1=a.x+a.w/2, y1=a.y, x2=b.x+b.w/2, y2=b.y, midY=Math.max(10,Math.min(y1,y2)-18);
+      s+='<path d="M '+x1+' '+y1+' C '+x1+' '+midY+', '+x2+' '+midY+', '+x2+' '+y2+'" fill="none" stroke="var(--ink-3)" stroke-width="1.4" stroke-dasharray="4 4"/>'+
+         (e.label?'<text x="'+((x1+x2)/2)+'" y="'+(midY-5)+'" text-anchor="middle" font-size="11" fill="var(--ink-3)">'+esc(e.label)+'</text>':'');
     }
   });
   nodes.forEach(n=>{
     const p=pos[n.id], hot=(Array.isArray(v.highlight)?v.highlight:[]).map(String).indexOf(n.id)>=0;
-    const label=String(n.label).length>12?String(n.label).slice(0,12)+'…':String(n.label);
     s+='<g><title>'+esc(n.label)+'</title>'+
-       '<rect x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.h+'" rx="9" fill="'+(hot?'var(--brand-soft)':'var(--card)')+'" stroke="'+(hot?'var(--brand)':'var(--line)')+'"/>'+
-       '<text x="'+(p.x+p.w/2)+'" y="'+(p.y+p.h/2+4)+'" text-anchor="middle" font-size="11.5" fill="var(--ink)">'+esc(label)+'</text></g>';
+       '<rect x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.h+'" rx="10" fill="'+(hot?'var(--brand-soft)':'var(--card)')+'" stroke="'+(hot?'var(--brand)':'var(--line)')+'"/>'+
+       n.lines.map((ln,i)=>'<text x="'+(p.x+p.w/2)+'" y="'+(p.y+PAD_Y+i*LINE_H+13)+'" text-anchor="middle" font-size="'+FS+'" fill="var(--ink)">'+esc(ln)+'</text>').join('')+
+       '</g>';
   });
   return svgWrap(s,'0 0 '+W+' '+H);
 }
