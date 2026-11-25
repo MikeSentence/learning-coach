@@ -168,15 +168,19 @@ textarea{resize:vertical;min-height:88px;line-height:1.6}
 .float-head .muted{font-weight:400;white-space:nowrap}
 .float-head .spacer{margin-left:auto}
 .float-grip{opacity:.45;font-size:12px;letter-spacing:-2px;flex:none;cursor:grab}
-.float-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.float-title{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.float-emoji{font-size:15px;line-height:1;flex:none}
+.float-text{overflow:hidden;text-overflow:ellipsis}
+.float-badge{min-width:18px;height:18px;border-radius:9px;background:var(--brand);color:#fff;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 5px;line-height:1;flex:none}
 .float-body{overflow:auto;padding:12px 14px;flex:1;-webkit-overflow-scrolling:touch}
 .float-foot{padding:10px 12px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:flex-end;background:var(--card);flex:none}
 .float-foot textarea{flex:1;width:auto;min-height:42px;max-height:120px;resize:vertical}
-.float-pop.min{width:auto;max-width:min(340px,calc(100vw - 28px));max-height:none;border-radius:999px}
-.float-pop.min .float-head{padding:7px 14px;border-bottom:0;cursor:pointer}
-.float-pop.min:hover{border-color:var(--brand);box-shadow:0 12px 36px rgba(0,0,0,.18)}
-.float-pop.min .float-body,.float-pop.min .float-foot,.float-pop.min .chat-ctx,.float-pop.min .float-min,.float-pop.min .float-clear,.float-pop.min .float-grip,.float-pop.min .spacer{display:none}
-.float-pop.min .float-title::after{content:" · 点此展开";font-weight:400;font-size:11px;color:var(--ink-3)}
+.float-pop.min{width:48px;height:48px;max-height:none;border-radius:50%;padding:0}
+.float-pop.min .float-head{width:48px;height:48px;padding:0;border-bottom:0;display:grid;place-items:center;cursor:grab}
+.float-pop.min:hover{border-color:var(--brand);box-shadow:0 12px 36px rgba(0,0,0,.22);transform:translateY(-1px)}
+.float-pop.min .float-body,.float-pop.min .float-foot,.float-pop.min .chat-ctx,.float-pop.min .float-min,.float-pop.min .float-clear,.float-pop.min .float-grip,.float-pop.min .spacer,.float-pop.min .float-text,.float-pop.min .muted{display:none}
+.float-pop.min .float-emoji{font-size:21px}
+.float-pop.min .float-badge{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;border-radius:8px;font-size:9px;padding:0 4px}
 .gloss-tools{position:sticky;top:-12px;background:var(--card);padding:4px 0 10px;z-index:1}
 .chat-ctx{font-size:11.5px;color:var(--ink-3);padding:8px 14px;background:var(--bg);border-bottom:1px solid var(--line-soft);flex:none;line-height:1.6}
 .chat-msg{margin-bottom:10px;display:flex;flex-direction:column;gap:3px}
@@ -447,26 +451,27 @@ textarea{resize:vertical;min-height:88px;line-height:1.6}
   </div>
 </div>
 
-<!-- 术语浮窗：贴着触发按钮弹出，可拖动；收起后停在原位 -->
+<!-- 术语浮窗：贴着触发按钮弹出，可拖动；收起成圆形按钮 -->
 <div class="float-pop" id="glossaryPop" hidden>
   <div class="float-head">
     <span class="float-grip" aria-hidden="true">⠿</span>
-    <span class="float-title">📖 术语对照表</span>
-    <span class="muted" id="glossCount"></span>
+    <span class="float-title"><span class="float-emoji">📖</span><span class="float-text">术语对照表</span></span>
+    <span class="float-badge" id="glossaryBadge" hidden>0</span>
     <span class="spacer"></span>
-    <button class="icon-btn float-min" onclick="minimizeFloat('glossaryPop')" title="收起到小条（点标题再展开）" aria-label="收起术语浮窗">▾</button>
+    <button class="icon-btn float-min" onclick="minimizeFloat('glossaryPop')" title="收起成圆形按钮（点按钮再展开）" aria-label="收起术语浮窗">▾</button>
   </div>
   <div class="float-body" id="glossaryPopBody"></div>
 </div>
 
-<!-- 随堂对话：默认上下文 = 当前关卡 + 当前题目；可拖动，收起后停在原位 -->
+<!-- 随堂对话：默认上下文 = 当前关卡 + 当前题目；可拖动，收起成圆形按钮 -->
 <div class="float-pop" id="chatPop" hidden>
   <div class="float-head">
     <span class="float-grip" aria-hidden="true">⠿</span>
-    <span class="float-title">💬 问教练</span>
+    <span class="float-title"><span class="float-emoji">💬</span><span class="float-text">问教练</span></span>
+    <span class="float-badge" id="chatBadge" hidden>0</span>
     <span class="spacer"></span>
     <button class="btn ghost sm float-clear" onclick="clearChat()">清空</button>
-    <button class="icon-btn float-min" onclick="minimizeFloat('chatPop')" title="收起到小条（点标题再展开）" aria-label="收起对话浮窗">▾</button>
+    <button class="icon-btn float-min" onclick="minimizeFloat('chatPop')" title="收起成圆形按钮（点按钮再展开）" aria-label="收起对话浮窗">▾</button>
   </div>
   <div class="chat-ctx" id="chatCtx"></div>
   <div class="float-body" id="chatList"></div>
@@ -1232,7 +1237,8 @@ function renderGlossary(){
         '<button class="btn soft sm" onclick="openGlossary(this)">📖 打开术语浮窗</button>';
     }
   }
-  const cnt=$('#glossCount'); if(cnt) cnt.textContent=S.glossary.length?S.glossary.length+' 条':'';
+  const badge=$('#glossaryBadge');
+  if(badge){ badge.hidden = !S.glossary.length; badge.textContent = S.glossary.length > 99 ? '99+' : S.glossary.length; }
   renderGlossaryPop();
 }
 function renderGlossaryPop(){
@@ -1309,7 +1315,6 @@ function placeFloat(el, trigger){
 }
 function showFloat(id, trigger){
   const el=$('#'+id); if(!el) return;
-  FLOAT_IDS.forEach(other=>{ if(other!==id){ const o=$('#'+other); if(o && !o.hidden) hideFloat(other); } });
   const wasMin=el.classList.contains('min');
   el.hidden=false;
   if(id==='glossaryPop') renderGlossaryPop();
@@ -1342,7 +1347,7 @@ function minimizeFloat(id){
   const r=el.getBoundingClientRect();
   el.style.left=r.left+'px'; el.style.top=r.top+'px';
   el.classList.add('min');
-  const head=el.querySelector('.float-head'); if(head) head.title='点此展开';
+  const head=el.querySelector('.float-head'); if(head) head.title='点击展开 · 可拖动';
   requestAnimationFrame(()=>{ clampFloat(el); updateFloatButtons(); });
   updateFloatButtons();
 }
@@ -1368,7 +1373,7 @@ function bindFloatDrag(el){
   head.addEventListener('pointerdown',e=>{
     if(e.button != null && e.button !== 0) return;
     if(e.target.closest('button,input,textarea,a,select')) return;
-    if(el.classList.contains('min')) return;
+    el._wasDragged=false;
     const r=el.getBoundingClientRect();
     const startX=e.clientX, startY=e.clientY, startLeft=r.left, startTop=r.top;
     const minTop=floatTopMin();
@@ -1389,6 +1394,7 @@ function bindFloatDrag(el){
       window.removeEventListener('pointerup',onUp);
       window.removeEventListener('pointercancel',onUp);
       el.classList.remove('dragging');
+      el._wasDragged=moved;
       clampFloat(el);
     };
     window.addEventListener('pointermove',onMove);
@@ -1399,6 +1405,7 @@ function bindFloatDrag(el){
   head.addEventListener('click',e=>{
     if(!el.classList.contains('min')) return;
     if(e.target.closest('button,input,textarea,a,select')) return;
+    if(el._wasDragged){ el._wasDragged=false; return; }
     expandFloat(el.id);
   });
 }
@@ -1451,6 +1458,8 @@ function clearChat(){
   S.chats[k]=[]; save(); renderChat();
 }
 function renderChat(){
+  const badge=$('#chatBadge');
+  if(badge){ const n=chatListFor(chatKey()).length; badge.hidden = !n; badge.textContent = n > 99 ? '99+' : n; }
   const ctx=$('#chatCtx');
   if(ctx) ctx.textContent='上下文：'+(S.view==='learn'&&S.levels[S.cur] ? (S.levels[S.cur].id+' · '+(S.levels[S.cur].title||'')+' · 第 '+((S.peekQ!=null?S.peekQ:S.qIndex)+1)+' 题'+(S.peekQ!=null?'（回看）':'')) : (S.topic||'还没有主题'));
   const list=$('#chatList'); if(!list) return;
