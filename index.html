@@ -1648,7 +1648,7 @@ function svgWrap(inner, vb, maxH){
   if(w > 640){
     return '<div style="overflow-x:auto;overflow-y:hidden;padding-bottom:4px"><svg viewBox="'+vb+'" style="display:block;height:auto;width:'+w+'px" preserveAspectRatio="xMidYMid meet" role="img">'+inner+'</svg></div>';
   }
-  return '<svg viewBox="'+vb+'" width="100%" style="display:block;height:auto;max-height:'+(maxH||520)+'px" preserveAspectRatio="xMidYMid meet" role="img">'+inner+'</svg>';
+  return '<svg viewBox="'+vb+'" width="100%" style="display:block;height:auto" preserveAspectRatio="xMidYMid meet" role="img">'+inner+'</svg>';
 }
 function visualNotes(v){
   if(!v || !Array.isArray(v.notes) || !v.notes.length) return '';
@@ -1672,7 +1672,7 @@ function visualFlow(v){
     chains.map(chain=>
       '<div style="flex:0 0 '+colW+';max-width:300px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 13px;display:flex;flex-direction:column">'+
         chain.map((n,j)=>
-          '<div title="'+esc(n)+'" style="font-size:13px;line-height:1.6;word-break:break-word;padding:8px 11px;background:var(--bg);border:1px solid var(--line-soft);border-radius:8px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">'+esc(n)+'</div>'+
+          '<div style="font-size:13px;line-height:1.6;word-break:break-word;padding:8px 12px;background:var(--bg);border:1px solid var(--line-soft);border-radius:8px">'+esc(n)+'</div>'+
           (j<chain.length-1?'<div style="text-align:center;color:var(--ink-3);font-size:13px;line-height:1.4;padding:2px 0">↓</div>':'')
         ).join('')+
       '</div>').join('')+
@@ -1698,8 +1698,8 @@ function visualSequence(v){
   });
   events.forEach((e,j)=>{
     const y=top+j*step, x1=xOf(e.from), x2=xOf(e.to);
-    const text=String(e.text||''), cut=text.length>18?text.slice(0,18)+'…':text;
-    const lines=[]; for(let i=0;i<cut.length;i+=9) lines.push(cut.slice(i,i+9));
+    const text=String(e.text||'');
+    const lines=[]; for(let i=0;i<text.length;i+=9) lines.push(text.slice(i,i+9));
     if(x1===x2){
       s+='<path d="M '+x1+' '+y+' h 48 v 18 h -48" fill="none" stroke="var(--blue)" stroke-width="1.6"/>'+
          '<polygon points="'+x1+','+(y+18)+' '+(x1-4)+','+(y+13)+' '+(x1+4)+','+(y+13)+'" fill="var(--blue)"/>'+
@@ -1739,28 +1739,21 @@ function visualGraph(v){
     (adj[a]||[]).forEach(b=>{ if(depth[b]==null){ depth[b]=(depth[a]||0)+1; queue.push(b); } });
   }
   nodes.forEach(n=>{ if(depth[n.id]==null) depth[n.id]=0; });
-  // 文字宽度估算：全角≈字号，半角≈字号*0.58；节点内换行，不截断
-  const FS=13, LINE_H=19, PAD_X=12, PAD_Y=8, MAX_BOX_W=200, MIN_BOX_W=56;
+  // 文字宽度估算：全角≈字号，半角≈字号*0.58；节点内换行，完整显示不截断
+  const FS=13, LINE_H=19, PAD_X=13, PAD_Y=9, MAX_BOX_W=230, MIN_BOX_W=56;
   const chW = ch => /[\x00-\xff]/.test(ch) ? FS*0.58 : FS;
   const tw = s => { let w=0; for(const ch of s) w+=chW(ch); return w; };
-  function wrap(s, maxW, maxLines){
-    maxLines = maxLines || 3;
+  function wrap(s, maxW){
     const lines=[]; let cur='';
     for(const ch of s){
-      if(cur && tw(cur+ch)>maxW){
-        lines.push(cur);
-        if(lines.length>=maxLines) break;
-        cur=ch;
-      }
+      if(cur && tw(cur+ch)>maxW){ lines.push(cur); cur=ch; }
       else cur+=ch;
     }
-    if(lines.length<maxLines && cur) lines.push(cur);
+    if(cur) lines.push(cur);
     return lines.length?lines:[''];
   }
   nodes.forEach(n=>{
-    n.lines=wrap(n.label, MAX_BOX_W-PAD_X*2, 3);
-    const shown=n.lines.join('');
-    if(shown.length < n.label.length) n.lines[n.lines.length-1]+='…';
+    n.lines=wrap(n.label, MAX_BOX_W-PAD_X*2);
     n.w=Math.round(Math.max(MIN_BOX_W, Math.min(MAX_BOX_W, Math.max.apply(null, n.lines.map(tw))+PAD_X*2)));
     n.h=Math.round(n.lines.length*LINE_H+PAD_Y*2);
   });
